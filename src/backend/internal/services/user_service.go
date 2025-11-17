@@ -16,6 +16,8 @@ var (
 	ErrPhoneExists = errors.New("phone already exists")
 	// ErrInvalidCredentials 用户名或密码错误
 	ErrInvalidCredentials = errors.New("invalid credentials")
+	// ErrUserNotFound 用户不存在
+	ErrUserNotFound = errors.New("user not found")
 )
 
 // UserService 用户业务逻辑层
@@ -128,7 +130,7 @@ func (s *UserService) GetUserInfo(userID int64) (*models.UserInfoResponse, error
 	user, err := s.userRepo.GetByID(userID)
 	if err != nil {
 		if err == repositories.ErrUserNotFound {
-			return nil, fmt.Errorf("user not found")
+			return nil, ErrUserNotFound
 		}
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}

@@ -29,6 +29,7 @@ func NewUserHandler() *UserHandler {
 // @Security BearerAuth
 // @Success 200 {object} utils.Response{data=models.UserInfoResponse} "获取成功"
 // @Failure 401 {object} utils.Response "未授权或Token无效"
+// @Failure 404 {object} utils.Response "用户不存在"
 // @Failure 500 {object} utils.Response "服务器内部错误"
 // @Router /user/info [get]
 func (h *UserHandler) GetUserInfo(c *gin.Context) {
@@ -48,10 +49,16 @@ func (h *UserHandler) GetUserInfo(c *gin.Context) {
 
 	info, err := h.userService.GetUserInfo(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.InternalServerError("获取用户信息失败"))
-		return
+		// 根据错误类型返回不同的状态码
+		switch err {
+		case services.ErrUserNotFound:
+			c.JSON(http.StatusNotFound, utils.NotFound("用户不存在"))
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, utils.InternalServerError("获取用户信息失败"))
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, utils.Success(info))
 }
-
