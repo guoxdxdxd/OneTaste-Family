@@ -91,6 +91,11 @@ func (s *UserService) Register(req *models.RegisterRequest) (*models.RegisterRes
 
 // Login 用户登录
 func (s *UserService) Login(req *models.LoginRequest) (*models.LoginResponse, error) {
+	// 验证手机号格式
+	if !utils.ValidatePhone(req.Phone) {
+		return nil, fmt.Errorf("invalid phone format")
+	}
+
 	// 获取用户
 	user, err := s.userRepo.GetByPhone(req.Phone)
 	if err != nil {
@@ -135,10 +140,10 @@ func (s *UserService) GetUserInfo(userID int64) (*models.UserInfoResponse, error
 	}
 
 	return &models.UserInfoResponse{
-		UserID:    user.ID,
-		Phone:     user.Phone,
-		Nickname:  user.Nickname,
-		Avatar:    user.Avatar,
+		UserID:     user.ID,
+		Phone:      user.Phone,
+		Nickname:   user.Nickname,
+		Avatar:     user.Avatar,
 		Membership: membership,
 	}, nil
 }
@@ -156,4 +161,3 @@ func (s *UserService) validateVerifyCode(phone, code string) bool {
 	// TODO: 从Redis获取验证码并验证
 	return false
 }
-

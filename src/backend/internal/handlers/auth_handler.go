@@ -33,15 +33,12 @@ func NewAuthHandler() *AuthHandler {
 // @Failure 500 {object} utils.Response "服务器内部错误"
 // @Router /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
-	var req models.RegisterRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		// 处理验证错误
-		errors := utils.ExtractValidationErrors(err)
-		c.JSON(http.StatusBadRequest, utils.ErrorWithFields(400, "请求参数错误", errors))
-		return
+	req, err := utils.BindJSON[models.RegisterRequest](c)
+	if err != nil {
+		return // 错误已经在BindJSON中处理并返回响应
 	}
 
-	resp, err := h.userService.Register(&req)
+	resp, err := h.userService.Register(req)
 	if err != nil {
 		// 根据错误类型返回不同的状态码
 		switch err {
@@ -72,14 +69,12 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Failure 500 {object} utils.Response "服务器内部错误"
 // @Router /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
-	var req models.LoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		errors := utils.ExtractValidationErrors(err)
-		c.JSON(http.StatusBadRequest, utils.ErrorWithFields(400, "请求参数错误", errors))
-		return
+	req, err := utils.BindJSON[models.LoginRequest](c)
+	if err != nil {
+		return // 错误已经在BindJSON中处理并返回响应
 	}
 
-	resp, err := h.userService.Login(&req)
+	resp, err := h.userService.Login(req)
 	if err != nil {
 		switch err {
 		case services.ErrInvalidCredentials:
@@ -93,4 +88,3 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, utils.SuccessWithMessage("登录成功", resp))
 }
-
