@@ -1,0 +1,408 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "家庭饮食管理系统的后端API接口文档",
+        "title": "OneTaste Family API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.onetastefamily.com/support",
+            "email": "support@onetastefamily.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "用户登录接口，支持手机号和密码登录。登录成功后返回用户ID、JWT Token和过期时间。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户认证"
+                ],
+                "summary": "用户登录",
+                "parameters": [
+                    {
+                        "description": "登录请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登录成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.LoginResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "手机号或密码错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "用户注册接口，支持手机号、密码、验证码、昵称注册。注册成功后返回用户ID和JWT Token。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户认证"
+                ],
+                "summary": "用户注册",
+                "parameters": [
+                    {
+                        "description": "注册请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "注册成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.RegisterResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误、验证码错误或手机号已注册",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "检查服务是否正常运行",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统"
+                ],
+                "summary": "健康检查",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/info": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前登录用户的基本信息和会员状态。需要Bearer Token认证。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "获取用户信息",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.UserInfoResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.LoginRequest": {
+            "description": "用户登录请求参数",
+            "type": "object",
+            "required": [
+                "password",
+                "phone"
+            ],
+            "properties": {
+                "password": {
+                    "description": "密码",
+                    "type": "string",
+                    "example": "password123"
+                },
+                "phone": {
+                    "description": "手机号",
+                    "type": "string",
+                    "example": "13800138000"
+                }
+            }
+        },
+        "models.LoginResponse": {
+            "description": "用户登录成功返回的数据",
+            "type": "object",
+            "properties": {
+                "expires_in": {
+                    "description": "Token过期时间（秒）",
+                    "type": "integer",
+                    "example": 86400
+                },
+                "token": {
+                    "description": "JWT Token",
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "user_id": {
+                    "description": "用户ID",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "models.MembershipInfo": {
+            "description": "用户会员信息",
+            "type": "object",
+            "properties": {
+                "expires_at": {
+                    "description": "到期时间，免费版为null",
+                    "type": "string",
+                    "example": "2024-12-31T23:59:59Z"
+                },
+                "type": {
+                    "description": "会员类型：free-免费版，premium-付费版",
+                    "type": "string",
+                    "example": "free"
+                }
+            }
+        },
+        "models.RegisterRequest": {
+            "description": "用户注册请求参数",
+            "type": "object",
+            "required": [
+                "nickname",
+                "password",
+                "phone",
+                "verify_code"
+            ],
+            "properties": {
+                "nickname": {
+                    "description": "昵称",
+                    "type": "string",
+                    "example": "张三"
+                },
+                "password": {
+                    "description": "密码，至少6位",
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "password123"
+                },
+                "phone": {
+                    "description": "手机号，11位数字",
+                    "type": "string",
+                    "example": "13800138000"
+                },
+                "verify_code": {
+                    "description": "验证码，6位数字",
+                    "type": "string",
+                    "example": "123456"
+                }
+            }
+        },
+        "models.RegisterResponse": {
+            "description": "用户注册成功返回的数据",
+            "type": "object",
+            "properties": {
+                "token": {
+                    "description": "JWT Token",
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "user_id": {
+                    "description": "用户ID",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "models.UserInfoResponse": {
+            "description": "用户信息返回数据",
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "头像URL",
+                    "type": "string",
+                    "example": "https://..."
+                },
+                "membership": {
+                    "description": "会员信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.MembershipInfo"
+                        }
+                    ]
+                },
+                "nickname": {
+                    "description": "昵称",
+                    "type": "string",
+                    "example": "张三"
+                },
+                "phone": {
+                    "description": "手机号",
+                    "type": "string",
+                    "example": "13800138000"
+                },
+                "user_id": {
+                    "description": "用户ID",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "utils.FieldError": {
+            "description": "字段验证错误信息",
+            "type": "object",
+            "properties": {
+                "field": {
+                    "description": "错误字段名",
+                    "type": "string",
+                    "example": "phone"
+                },
+                "message": {
+                    "description": "错误消息",
+                    "type": "string",
+                    "example": "手机号格式不正确"
+                }
+            }
+        },
+        "utils.Response": {
+            "description": "统一的API响应格式",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "响应状态码",
+                    "type": "integer",
+                    "example": 200
+                },
+                "data": {
+                    "description": "响应数据"
+                },
+                "errors": {
+                    "description": "字段错误列表（仅在错误时返回）",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/utils.FieldError"
+                    }
+                },
+                "message": {
+                    "description": "响应消息",
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "使用 \"Bearer {token}\" 格式，token 通过登录接口获取",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

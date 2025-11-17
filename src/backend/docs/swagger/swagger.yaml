@@ -1,0 +1,276 @@
+basePath: /api/v1
+definitions:
+  models.LoginRequest:
+    description: 用户登录请求参数
+    properties:
+      password:
+        description: 密码
+        example: password123
+        type: string
+      phone:
+        description: 手机号
+        example: "13800138000"
+        type: string
+    required:
+    - password
+    - phone
+    type: object
+  models.LoginResponse:
+    description: 用户登录成功返回的数据
+    properties:
+      expires_in:
+        description: Token过期时间（秒）
+        example: 86400
+        type: integer
+      token:
+        description: JWT Token
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      user_id:
+        description: 用户ID
+        example: 1
+        type: integer
+    type: object
+  models.MembershipInfo:
+    description: 用户会员信息
+    properties:
+      expires_at:
+        description: 到期时间，免费版为null
+        example: "2024-12-31T23:59:59Z"
+        type: string
+      type:
+        description: 会员类型：free-免费版，premium-付费版
+        example: free
+        type: string
+    type: object
+  models.RegisterRequest:
+    description: 用户注册请求参数
+    properties:
+      nickname:
+        description: 昵称
+        example: 张三
+        type: string
+      password:
+        description: 密码，至少6位
+        example: password123
+        minLength: 6
+        type: string
+      phone:
+        description: 手机号，11位数字
+        example: "13800138000"
+        type: string
+      verify_code:
+        description: 验证码，6位数字
+        example: "123456"
+        type: string
+    required:
+    - nickname
+    - password
+    - phone
+    - verify_code
+    type: object
+  models.RegisterResponse:
+    description: 用户注册成功返回的数据
+    properties:
+      token:
+        description: JWT Token
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      user_id:
+        description: 用户ID
+        example: 1
+        type: integer
+    type: object
+  models.UserInfoResponse:
+    description: 用户信息返回数据
+    properties:
+      avatar:
+        description: 头像URL
+        example: https://...
+        type: string
+      membership:
+        allOf:
+        - $ref: '#/definitions/models.MembershipInfo'
+        description: 会员信息
+      nickname:
+        description: 昵称
+        example: 张三
+        type: string
+      phone:
+        description: 手机号
+        example: "13800138000"
+        type: string
+      user_id:
+        description: 用户ID
+        example: 1
+        type: integer
+    type: object
+  utils.FieldError:
+    description: 字段验证错误信息
+    properties:
+      field:
+        description: 错误字段名
+        example: phone
+        type: string
+      message:
+        description: 错误消息
+        example: 手机号格式不正确
+        type: string
+    type: object
+  utils.Response:
+    description: 统一的API响应格式
+    properties:
+      code:
+        description: 响应状态码
+        example: 200
+        type: integer
+      data:
+        description: 响应数据
+      errors:
+        description: 字段错误列表（仅在错误时返回）
+        items:
+          $ref: '#/definitions/utils.FieldError'
+        type: array
+      message:
+        description: 响应消息
+        example: success
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@onetastefamily.com
+    name: API Support
+    url: http://www.onetastefamily.com/support
+  description: 家庭饮食管理系统的后端API接口文档
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: OneTaste Family API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户登录接口，支持手机号和密码登录。登录成功后返回用户ID、JWT Token和过期时间。
+      parameters:
+      - description: 登录请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.LoginResponse'
+              type: object
+        "400":
+          description: 手机号或密码错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: 用户登录
+      tags:
+      - 用户认证
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: 用户注册接口，支持手机号、密码、验证码、昵称注册。注册成功后返回用户ID和JWT Token。
+      parameters:
+      - description: 注册请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 注册成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RegisterResponse'
+              type: object
+        "400":
+          description: 请求参数错误、验证码错误或手机号已注册
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: 用户注册
+      tags:
+      - 用户认证
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: 检查服务是否正常运行
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 健康检查
+      tags:
+      - 系统
+  /user/info:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前登录用户的基本信息和会员状态。需要Bearer Token认证。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.UserInfoResponse'
+              type: object
+        "401":
+          description: 未授权或Token无效
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取用户信息
+      tags:
+      - 用户
+securityDefinitions:
+  BearerAuth:
+    description: 使用 "Bearer {token}" 格式，token 通过登录接口获取
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

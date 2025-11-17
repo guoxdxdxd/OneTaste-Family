@@ -1,0 +1,30 @@
+# 应用配置文件示例
+# 复制此文件为 config.yaml 并修改相应配置
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  mode: "debug"  # debug, release, test
+
+database:
+  host: "localhost"
+  port: 5432
+  user: "postgres"
+  password: "postgres"
+  dbname: "onetaste_family"
+  sslmode: "disable"
+  max_open_conns: 25
+  max_idle_conns: 5
+  conn_max_lifetime: 300s  # 5分钟
+  conn_max_idle_time: 60s   # 1分钟
+
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  db: 0
+
+jwt:
+  secret: "your-secret-key-change-in-production"
+  expiration: 24h  # 24小时
+
