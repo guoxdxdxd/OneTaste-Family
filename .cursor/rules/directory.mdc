@@ -1,0 +1,14 @@
+---
+alwaysApply: true
+---
+## 目录文件说明
+1. AI_SERVICE_DIRECTORY.md ai服务
+2. BACKEND_DIRECTORY.md 后台服务
+3. FRONTEND_ADMIN_DIRECTORY.md 前端管理后台
+4. FRONTEND_MINIAPP_DIRECTORY.md 前端小程序
+5. DIRECTORY_STRUCTURE.md 整体目录
+
+## 规则
+1. 从相应的目录文件说明快速找到需要的内容
+2. 每次目录发生变成需要维护相应的目录文件
+3. 目录维护需要带上注释这是什么文件

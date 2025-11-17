@@ -1,0 +1,55 @@
+# 环境变量文件
+docker/.env
+
+# 数据目录
+data/
+
+# 备份目录
+backups/
+
+# 日志文件
+*.log
+logs/
+
+# IDE 配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.temp
+
+# 编译文件
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 测试覆盖率
+coverage/
+*.cover
+
+# 依赖目录
+node_modules/
+vendor/
+
+# 构建输出
+dist/
+build/
+*.out
+
+# 配置文件（包含敏感信息）
+/docker/.env
+src/backend/config/config.yaml
+src/backend/main
+src/backend/*.out
+
+# Swagger 生成的文档（可选，如果不想提交生成的文档）
+# src/backend/docs/swagger/
