@@ -61,12 +61,19 @@ export const useFamilyStore = defineStore('family', {
       this.error = ''
       try {
         const res = await getFamilyMembers()
-        if (res.data?.members) {
-          this.members = res.data.members
-          this.membersLoadedAt = Date.now()
-        } else {
-          this.members = []
+        const payload = res?.data
+        let members = []
+        if (Array.isArray(payload)) {
+          members = payload
+        } else if (Array.isArray(payload?.members)) {
+          members = payload.members
+        } else if (Array.isArray(payload?.data?.members)) {
+          members = payload.data.members
+        } else if (Array.isArray(payload?.data)) {
+          members = payload.data
         }
+        this.members = members
+        this.membersLoadedAt = Date.now()
         return this.members
       } catch (error) {
         this.error = error.message || '获取成员列表失败'
