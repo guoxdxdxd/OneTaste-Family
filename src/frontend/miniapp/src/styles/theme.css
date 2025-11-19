@@ -1,0 +1,48 @@
+:root {
+  --color-background: #fffaf6;
+  --color-surface: #fff5ef;
+  --color-card: #ffffff;
+  --color-border: #f3dfd4;
+  --color-accent: #f08a5d;
+  --color-accent-soft: #f9b995;
+  --color-muted: #c08b72;
+  --color-text-primary: #5a3b2e;
+  --color-text-secondary: #a07e6b;
+  --shadow-card: 0 12px 35px rgba(216, 150, 122, 0.18);
+  --radius-large: 20px;
+  --radius-medium: 14px;
+  --radius-small: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-background);
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-muted);
+}
+
+#app {
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(240, 138, 93, 0.2);
+  color: var(--color-text-primary);
+}
