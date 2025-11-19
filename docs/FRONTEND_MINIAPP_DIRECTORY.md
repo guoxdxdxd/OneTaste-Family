@@ -1,353 +1,194 @@
 # Frontend Miniapp 目录结构
 
-本文档描述了小程序（Vue 3）的详细目录结构。
+本文档依据当前仓库 `src/frontend/miniapp` 的真实文件生成，完整列出项目包含的目录与文件，并给出简要功能说明，便于定位代码位置和职责。
 
-## 目录结构
+## 目录结构（含注释）
 
 ```
 src/frontend/miniapp/
-├── src/                    # 源代码目录
-│   ├── assets/            # 静态资源
-│   │   ├── images/       # 图片资源目录，存放项目使用的图片文件
-│   │   ├── icons/        # 图标资源目录，存放图标文件
-│   │   └── fonts/        # 字体文件目录，存放自定义字体文件
-│   │
-│   ├── components/        # 公共组件
-│   │   ├── common/       # 通用组件
-│   │   │   ├── Button.vue        # 按钮组件，通用按钮UI组件
-│   │   │   ├── Input.vue         # 输入框组件，通用输入框UI组件
-│   │   │   ├── Card.vue          # 卡片组件，通用卡片UI组件
-│   │   │   ├── Tag.vue           # 标签组件，通用标签UI组件
-│   │   │   └── Empty.vue         # 空状态组件，显示空数据状态
-│   │   │
-│   │   └── business/     # 业务组件
-│   │       ├── RecipeCard.vue        # 食谱卡片组件，显示食谱信息卡片
-│   │       ├── IngredientCard.vue   # 食材卡片组件，显示食材信息卡片
-│   │       ├── ShoppingItem.vue      # 购物清单项组件，显示购物清单单项
-│   │       └── FamilyMember.vue     # 家庭成员组件，显示家庭成员信息
-│   │
-│   ├── pages/             # 页面组件
-│   │   ├── home/         # 首页
-│   │   │   └── Home.vue              # 首页组件，应用首页展示
-│   │   │
-│   │   ├── recipe/       # 食谱相关
-│   │   │   ├── RecipeList.vue       # 食谱列表页面，显示所有食谱列表
-│   │   │   ├── RecipeDetail.vue     # 食谱详情页面，显示食谱详细信息
-│   │   │   └── RecipeRecommend.vue # 食谱推荐页面，AI推荐食谱
-│   │   │
-│   │   ├── shopping/     # 购物清单
-│   │   │   ├── ShoppingList.vue     # 购物清单列表页面，显示所有购物清单
-│   │   │   └── ShoppingDetail.vue   # 购物清单详情页面，显示购物清单详情
-│   │   │
-│   │   ├── family/       # 家庭管理
-│   │   │   ├── FamilyHome.vue       # 家庭首页，家庭信息概览
-│   │   │   ├── FamilyMembers.vue    # 家庭成员页面，管理家庭成员
-│   │   │   └── FamilySettings.vue   # 家庭设置页面，家庭设置管理
-│   │   │
-│   │   ├── profile/      # 个人中心
-│   │   │   ├── Profile.vue          # 个人资料页面，查看和编辑个人信息
-│   │   │   ├── Settings.vue         # 设置页面，个人设置管理
-│   │   │   └── About.vue            # 关于页面，应用信息说明
-│   │   │
-│   │   └── auth/         # 认证相关
-│   │       ├── Login.vue            # 登录页面，用户登录
-│   │       └── Register.vue        # 注册页面，用户注册
-│   │
-│   ├── router/            # 路由配置
-│   │   ├── index.js      # 路由主文件，定义所有路由规则
-│   │   └── guards.js     # 路由守卫，处理路由权限和登录验证
-│   │
-│   ├── stores/            # 状态管理（Pinia）
-│   │   ├── user.js       # 用户状态管理，管理用户信息和登录状态
-│   │   ├── family.js     # 家庭状态管理，管理家庭相关状态
-│   │   ├── recipe.js     # 食谱状态管理，管理食谱相关状态
-│   │   └── shopping.js   # 购物清单状态管理，管理购物清单相关状态
-│   │
-│   ├── api/               # API接口
-│   │   ├── index.js      # API配置文件，HTTP请求基础配置
-│   │   ├── user.js       # 用户API接口，用户相关的API调用
-│   │   ├── family.js     # 家庭API接口，家庭相关的API调用
-│   │   ├── recipe.js     # 食谱API接口，食谱相关的API调用
-│   │   ├── ingredient.js # 食材API接口，食材相关的API调用
-│   │   └── shopping.js   # 购物清单API接口，购物清单相关的API调用
-│   │
-│   ├── utils/             # 工具函数
-│   │   ├── request.js    # HTTP请求封装，axios封装和拦截器
-│   │   ├── auth.js       # 认证工具，token管理和认证相关函数
-│   │   ├── storage.js    # 本地存储工具，localStorage和sessionStorage封装
-│   │   ├── format.js     # 格式化工具，日期、金额等格式化函数
-│   │   ├── validate.js   # 验证工具，表单验证和数据验证函数
-│   │   ├── constants.js  # 常量定义，项目常量配置
-│   │   └── wechat.js     # 微信小程序工具，微信API封装
-│   │
-│   ├── styles/            # 样式文件
-│   │   ├── variables.scss # SCSS变量文件，定义颜色、尺寸等变量
-│   │   ├── mixins.scss   # SCSS混入文件，定义可复用的样式混入
-│   │   ├── common.scss   # 通用样式文件，全局通用样式
-│   │   └── reset.scss    # 样式重置文件，重置浏览器默认样式
-│   │
-│   ├── composables/       # 组合式函数
-│   │   ├── useAuth.js    # 认证相关组合函数，认证逻辑封装
-│   │   ├── useFamily.js  # 家庭相关组合函数，家庭管理逻辑封装
-│   │   ├── useRecipe.js  # 食谱相关组合函数，食谱操作逻辑封装
-│   │   └── useShopping.js # 购物清单相关组合函数，购物清单逻辑封装
-│   │
-│   ├── directives/        # 自定义指令
-│   │   └── permission.js # 权限指令，控制元素显示权限
-│   │
-│   ├── plugins/           # 插件
-│   │   └── ui-library.js # UI库配置，UI组件库初始化
-│   │
-│   ├── App.vue           # 根组件，应用根组件
-│   └── main.js           # 入口文件，应用启动入口
-│
-├── public/                # 公共资源
-│   ├── favicon.ico       # 网站图标，浏览器标签页图标
-│   └── index.html        # HTML模板，应用HTML入口模板
-│
-├── .env                   # 环境变量文件（不提交到版本控制），包含敏感配置
-├── .env.development       # 开发环境变量文件，开发环境配置
-├── .env.production        # 生产环境变量文件，生产环境配置
-├── .env.example           # 环境变量示例文件，环境变量模板
-│
-├── package.json           # 项目依赖配置文件，定义项目依赖和脚本
-├── package-lock.json      # 依赖锁定文件，锁定依赖版本
-├── vite.config.js         # Vite配置文件，构建工具配置
-├── .gitignore             # Git忽略文件，定义不提交到版本控制的文件
-├── .eslintrc.js           # ESLint配置文件，代码检查规则
-├── .prettierrc            # Prettier配置文件，代码格式化规则
-└── README.md              # 项目说明文档，项目说明和使用指南
+├── .env                              # 本地开发环境变量（不会提交）
+├── .env.example                      # 环境变量示例，说明需要配置的键
+├── .gitignore                        # Git 忽略规则，排除 node_modules 等目录
+├── README.md                         # 小程序端项目说明与运行指南
+├── index.html                        # Vite 入口 HTML 模板
+├── node_modules/                     # npm 安装的依赖目录
+├── package-lock.json                 # 锁定依赖的版本与完整性
+├── package.json                      # 项目依赖、脚本命令与元数据
+├── src/                              # 小程序端源代码
+│   ├── App.vue                       # 根组件，负责全局布局与路由出口
+│   ├── api/                          # HTTP API 封装
+│   │   ├── index.js                  # axios 实例与拦截器配置
+│   │   └── user.js                   # 用户注册/登录/信息接口
+│   ├── main.js                       # Vue/Vite 入口文件，挂载应用
+│   ├── pages/                        # 业务页面
+│   │   ├── auth/                     # 认证流程页面
+│   │   │   ├── Login.vue             # 登录页面
+│   │   │   └── Register.vue          # 注册页面
+│   │   └── home/                     # 首页模块
+│   │       └── Home.vue              # 首页展示页面
+│   ├── router/                       # Vue Router 配置
+│   │   ├── guards.js                 # 路由守卫，处理鉴权与重定向
+│   │   └── index.js                  # 路由表与实例化逻辑
+│   ├── stores/                       # Pinia 状态仓库
+│   │   └── user.js                   # 用户登录状态与信息管理
+│   ├── styles/                       # 全局样式
+│   │   └── theme.css                 # 主题色与公共样式变量
+│   └── utils/                        # 通用工具方法
+│       ├── auth.js                   # token 与用户上下文的读写
+│       ├── constants.js              # 应用常量定义
+│       ├── request.js                # axios 请求封装与拦截处理
+│       ├── storage.js                # localStorage/sessionStorage 封装
+│       └── validate.js               # 表单与字段验证函数
+└── vite.config.js                    # Vite 构建与代理配置
 ```
 
 ## 目录说明
 
-### src/assets/
-静态资源目录：
-- 图片、图标、字体等静态文件
-- 小程序中需要注意图片大小优化
+### 顶层文件
+- `.env` / `.env.example`：维护运行所需的后台 API 地址等变量，example 用于指导配置。
+- `.gitignore`：忽略 node_modules、构建产物和本地配置。
+- `README.md`：说明如何安装依赖、运行与构建小程序。
+- `index.html`：Vite 的模板入口，注入打包后的脚本。
+- `package.json` / `package-lock.json`：记录依赖与 npm scripts，任何库升级都需同步锁文件。
+- `node_modules/`：npm 自动生成，勿手动修改。
+- `vite.config.js`：负责配置路径别名、代理、构建优化等。
 
-### src/components/
-组件目录：
-- **common/**: 通用UI组件
-- **business/**: 业务组件，如食谱卡片、购物清单项等
+### src/
+源代码主目录：
+- `App.vue`：根组件，包含 `<router-view />`，可挂载全局布局逻辑。
+- `main.js`：创建 Vue 应用，注册 Router、Pinia、全局样式等。
+- `api/`：集中封装 HTTP 调用；`index.js` 创建 axios 实例并配置 token 拦截，`user.js` 提供注册/登录/获取信息等具体接口。
+- `pages/`：按业务切分的 Vue 组件，目前包含 `home` 与 `auth` 两个模块，后续新增页面请在此按模块建子目录。
+- `router/`：`index.js` 定义路由表、懒加载组件，`guards.js` 中实现鉴权、重定向等逻辑。
+- `stores/`：Pinia 状态管理，目前只有 `user.js`，负责 token、登录态和用户信息；未来可在此新增家庭、购物等模块。
+- `styles/`：全局样式与主题变量集合，`theme.css` 被 `main.js` 引入。
+- `utils/`：复用工具。`auth.js` 管理 token 与用户缓存，`request.js` 统一 HTTP 错误处理，`storage.js` 封装浏览器存储，`constants.js` 保留常量，`validate.js` 提供校验器。
 
-### src/pages/
-页面组件目录：
-- 小程序的主要页面
-- 按功能模块组织
-- 每个页面对应一个路由
+### pages/
+- `pages/home/Home.vue`：应用首页，与后端接口交互展示概览内容。
+- `pages/auth/Login.vue`：登录表单，调用 `api/user.login` 与 `useUserStore`。
+- `pages/auth/Register.vue`：注册表单，复用校验逻辑并完成注册流程。
 
-### src/router/
-路由配置：
-- 小程序路由定义
-- 路由守卫（登录验证、权限控制）
-- 页面跳转配置
+### router/
+- `router/index.js`：配置 `createRouter`，导入页面组件，注册路由守卫。
+- `router/guards.js`：集中放置 `beforeEach` 逻辑，检查 `useUserStore` 的 `isLoggedIn` 并统一跳转。
 
-### src/stores/
-状态管理（Pinia）：
-- 全局状态管理
-- 用户信息、家庭信息、购物清单等状态
-- 支持持久化存储
+### stores/
+- `stores/user.js`：唯一的 Pinia store，封装注册/登录/获取用户信息等流程，暴露 getter（如 `loggedIn`、`membershipType`）和 action。
 
-### src/api/
-API接口封装：
-- 统一的HTTP请求封装
-- 按业务模块组织
-- 请求拦截和响应处理
-- 错误统一处理
+### styles/
+- `styles/theme.css`：维护 CSS 变量、基础排版与公共颜色，供全局导入。
 
-### src/utils/
-工具函数：
-- HTTP请求工具
-- 认证工具（Token管理）
-- 本地存储工具
-- 格式化工具（日期、金额等）
-- 验证工具（表单验证）
-- 微信小程序相关工具（如获取用户信息）
-
-### src/styles/
-样式文件：
-- SCSS变量和混入
-- 全局样式
-- 小程序样式规范
-
-### src/composables/
-组合式函数：
-- 可复用的业务逻辑
-- 如家庭管理、食谱推荐、购物清单等
-
-### src/directives/
-自定义指令：
-- Vue自定义指令
-- 如权限控制指令
-
-### src/plugins/
-插件配置：
-- 第三方库的初始化
-- UI组件库配置
-
-### public/
-公共资源目录：
-- 不会被构建工具处理的静态文件
-
-## 文件命名规范
-
-### Vue组件
-- 使用PascalCase：`RecipeCard.vue`
-- 页面组件：`Home.vue`, `RecipeList.vue`
-- 组件名与文件名保持一致
-
-### JavaScript文件
-- 使用camelCase：`userService.js`
-- 工具文件：`formatDate.js`, `validateForm.js`
-- 常量文件：`constants.js`
-
-### 样式文件
-- 使用kebab-case：`recipe-card.scss`
-- 或使用功能命名：`common.scss`, `variables.scss`
-
-## 小程序特殊说明
-
-### 页面配置
-每个页面可能需要独立的配置文件：
-- `pages/home/home.json` - 页面配置
-- `app.json` - 全局配置
-
-### 小程序API
-- 使用微信小程序API时需要封装
-- 注意小程序的生命周期
-- 处理小程序特有的功能（如分享、扫码等）
-
-### 性能优化
-- 图片懒加载
-- 列表虚拟滚动
-- 代码分包加载
-- 减少包体积
+### utils/
+- `auth.js`：调用 `storage.js`，封装 token 持久化与用户信息缓存。
+- `constants.js`：集中放置常用常量（如 token key、路由名等）。
+- `request.js`：创建 axios 实例、配置请求/响应拦截器、统一错误抛出。
+- `storage.js`：定义 `userInfoStorage` 等读写 helper，避免直接操作 `localStorage`。
+- `validate.js`：常用校验函数，例如手机号、验证码、密码复杂度等。
 
 ## 代码组织原则
 
-1. **组件化开发**：
-   - 单一职责原则
-   - 可复用性
-   - 组件通信规范化
+1. **组件化开发**：将业务页面拆分到 `src/pages/{module}` 下，满足单一职责；跨页面的可复用 UI 请抽离到未来的 `components/` 目录。
+2. **状态管理**：Pinia Store 均放在 `src/stores`，每个 Store 专注一个上下文（当前只有 `user`），借助 `persist` 能力通过 `storage.js` 持久化关键信息。
+3. **API 封装**：所有后端请求通过 `src/api` 调用 `utils/request.js` 创建的 axios 实例；统一添加 token、处理错误与重试逻辑。
+4. **路由管理**：`router/index.js` 采用模块化路由定义；`guards.js` 统一进行登录校验与跳转，避免在组件内重复判断。
+5. **样式管理**：全局样式统一集中在 `styles/theme.css`，组件内鼓励使用 scoped 样式并通过 CSS 变量共享主题。
 
-2. **状态管理**：
-   - 全局状态使用Pinia
-   - 支持持久化（localStorage）
-   - 避免过度使用全局状态
+## 代码示例
 
-3. **API封装**：
-   - 统一的请求拦截器
-   - Token自动添加
-   - 错误统一处理
-   - 请求重试机制
-
-4. **路由管理**：
-   - 路由懒加载
-   - 路由守卫（登录验证）
-   - 页面权限控制
-
-5. **样式管理**：
-   - 使用SCSS变量统一主题
-   - 响应式设计
-   - 小程序样式规范
-
-## 开发规范
-
-### 组件结构
-```vue
-<template>
-  <!-- 模板内容 -->
-</template>
-
-<script setup>
-// 导入依赖
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-
-// 定义props
-const props = defineProps({
-  // ...
-})
-
-// 响应式数据
-const loading = ref(false)
-
-// 生命周期
-onMounted(() => {
-  // 初始化逻辑
-})
-
-// 方法
-const handleAction = () => {
-  // ...
-}
-</script>
-
-<style scoped>
-/* 样式 */
-</style>
-```
-
-### API调用示例
+### API 调用示例（`src/api/user.js`）
 ```javascript
-// api/recipe.js
-import request from '@/utils/request'
+import request from './index'
 
-export function getRecipeList(params) {
-  return request.get('/api/recipes', { params })
+export function login(data) {
+  return request.post('/auth/login', data)
 }
 
-export function getRecipeById(id) {
-  return request.get(`/api/recipes/${id}`)
+export function register(data) {
+  return request.post('/auth/register', data)
 }
 
-export function recommendRecipe(data) {
-  return request.post('/api/recipes/recommend', data)
+export function getUserInfo() {
+  return request.get('/user/info')
 }
 ```
 
-### 状态管理示例
+### 状态管理示例（`src/stores/user.js` 摘录）
 ```javascript
-// stores/family.js
 import { defineStore } from 'pinia'
+import { setAuth, clearAuth, getToken, getUserInfo } from '@/utils/auth'
+import { userInfoStorage } from '@/utils/storage'
+import { register as registerApi, login as loginApi, getUserInfo as getUserInfoApi } from '@/api/user'
 
-export const useFamilyStore = defineStore('family', {
+export const useUserStore = defineStore('user', {
   state: () => ({
-    currentFamily: null,
-    members: []
+    token: getToken(),
+    userInfo: getUserInfo(),
+    isLoggedIn: !!getToken()
   }),
-  
-  getters: {
-    memberCount: (state) => state.members.length
-  },
-  
   actions: {
-    async loadFamily(id) {
-      // 加载家庭信息
-    },
-    
-    async addMember(member) {
-      // 添加成员
-    }
-  },
-  
-  persist: {
-    enabled: true,
-    strategies: [
-      {
-        key: 'family',
-        storage: localStorage
+    async register(data) {
+      const res = await registerApi(data)
+      if (res.code === 200 && res.data) {
+        this.setAuth(res.data.token, {
+          user_id: res.data.user_id,
+          phone: data.phone,
+          nickname: data.nickname
+        })
       }
-    ]
+      return res
+    },
+    async login(data) {
+      const res = await loginApi(data)
+      if (res.code === 200 && res.data) {
+        this.setAuth(res.data.token, { user_id: res.data.user_id, phone: data.phone })
+        await this.fetchUserInfo()
+      }
+      return res
+    },
+    async fetchUserInfo() {
+      const res = await getUserInfoApi()
+      if (res.code === 200 && res.data) {
+        this.userInfo = res.data
+        userInfoStorage.setUserInfo(res.data)
+      }
+      return res
+    },
+    setAuth(token, userInfo) {
+      this.token = token
+      this.userInfo = userInfo
+      this.isLoggedIn = true
+      setAuth(token, userInfo)
+    },
+    logout() {
+      this.token = null
+      this.userInfo = null
+      this.isLoggedIn = false
+      clearAuth()
+    }
   }
 })
 ```
 
-## 相关文档
+### 页面结构示例（`src/pages/auth/Login.vue`）
+```vue
+<template>
+  <form @submit.prevent="handleLogin">
+    <!-- 登录表单内容 -->
+  </form>
+</template>
 
-- [API接口文档](./接口文档.md)
-- [数据库设计文档](./数据库设计.md)
-- [部署文档](./部署文档.md)
+<script setup>
+import { ref } from 'vue'
+import { useUserStore } from '@/stores/user'
 
+const userStore = useUserStore()
+const form = ref({ phone: '', password: '' })
 
+const handleLogin = async () => {
+  await userStore.login(form.value)
+}
+</script>
+```
+
+当新增或调整目录结构时，请同步更新本文件，确保文档与代码保持一致。

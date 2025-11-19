@@ -1,256 +1,133 @@
 # Backend 目录结构
 
-本文档描述了 Go 后端服务的详细目录结构。
+本文档基于当前仓库 (`src/backend`) 的真实目录生成，列出了所有在仓库中的目录与文件，并为每个条目提供了用途说明，方便快速了解后端 Go 服务的组织方式。
 
-## 目录结构
+## 目录结构（含注释）
 
 ```
 src/backend/
-├── cmd/                    # 应用程序入口
-│   └── main.go            # 主程序入口文件，初始化应用并启动HTTP服务器
-│
-├── internal/               # 内部代码（不对外暴露）
-│   ├── config/            # 配置管理
-│   │   ├── config.go      # 配置结构定义，包含所有配置项的结构体
-│   │   └── loader.go      # 配置加载器，从文件或环境变量加载配置
-│   │
-│   ├── models/            # 数据模型
-│   │   ├── user.go        # 用户模型，定义用户数据结构
-│   │   ├── family.go      # 家庭模型，定义家庭数据结构
-│   │   ├── recipe.go      # 食谱模型，定义食谱数据结构
-│   │   ├── ingredient.go  # 食材模型，定义食材数据结构
-│   │   └── shopping.go    # 购物清单模型，定义购物清单数据结构
-│   │
-│   ├── handlers/          # HTTP处理器（Controller层）
-│   │   ├── user_handler.go        # 用户相关HTTP请求处理器
-│   │   ├── family_handler.go      # 家庭相关HTTP请求处理器
-│   │   ├── recipe_handler.go      # 食谱相关HTTP请求处理器
-│   │   ├── ingredient_handler.go  # 食材相关HTTP请求处理器
-│   │   └── shopping_handler.go    # 购物清单相关HTTP请求处理器
-│   │
-│   ├── services/          # 业务逻辑层
-│   │   ├── user_service.go        # 用户业务逻辑服务
-│   │   ├── family_service.go      # 家庭业务逻辑服务
-│   │   ├── recipe_service.go      # 食谱业务逻辑服务
-│   │   ├── ingredient_service.go  # 食材业务逻辑服务
-│   │   ├── shopping_service.go    # 购物清单业务逻辑服务
-│   │   └── ai_service.go         # AI服务调用封装，与AI服务交互
-│   │
-│   ├── repositories/      # 数据访问层（Repository层）
-│   │   ├── user_repository.go        # 用户数据访问层，数据库CRUD操作
-│   │   ├── family_repository.go      # 家庭数据访问层，数据库CRUD操作
-│   │   ├── recipe_repository.go      # 食谱数据访问层，数据库CRUD操作
-│   │   ├── ingredient_repository.go  # 食材数据访问层，数据库CRUD操作
-│   │   └── shopping_repository.go    # 购物清单数据访问层，数据库CRUD操作
-│   │
-│   ├── middleware/        # 中间件
-│   │   ├── auth.go        # 认证中间件，JWT token验证
-│   │   ├── cors.go        # CORS中间件，跨域请求处理
-│   │   ├── logger.go      # 日志中间件，记录请求日志
-│   │   ├── recovery.go    # 错误恢复中间件，捕获panic并返回友好错误
-│   │   └── validator.go   # 参数验证中间件，验证请求参数
-│   │
-│   └── utils/            # 工具函数
-│       ├── jwt.go        # JWT工具，生成和验证JWT token
-│       ├── password.go   # 密码加密工具，密码哈希和验证
-│       ├── validator.go  # 验证工具，数据验证函数
-│       ├── response.go   # 响应格式化，统一API响应格式
-│       └── logger.go     # 日志工具，日志记录封装
-│
-├── pkg/                   # 可复用的公共包
-│   ├── database/         # 数据库连接
-│   │   ├── postgres.go   # PostgreSQL数据库连接封装
-│   │   └── redis.go      # Redis连接封装
-│   │
-│   └── errors/           # 错误定义
-│       └── errors.go     # 自定义错误类型定义
-│
-├── migrations/            # 数据库迁移脚本
-│   ├── 001_create_users.up.sql        # 创建用户表的迁移脚本（向上）
-│   ├── 001_create_users.down.sql      # 删除用户表的迁移脚本（向下）
-│   ├── 002_create_families.up.sql     # 创建家庭表的迁移脚本（向上）
-│   └── ...                            # 其他迁移脚本
-│
-├── config/                # 配置文件目录
-│   ├── config.yaml        # 配置文件（示例），包含应用配置
-│   └── config.example.yaml # 配置文件模板，供参考使用
-│
-├── tests/                 # 测试文件
-│   ├── handlers/          # HTTP处理器测试文件
-│   ├── services/          # 业务逻辑层测试文件
-│   └── repositories/      # 数据访问层测试文件
-│
-├── scripts/              # 脚本文件
-│   └── migrate.sh        # 数据库迁移脚本，执行迁移命令
-│
-├── go.mod                # Go模块定义文件，定义模块名称和依赖
-├── go.sum                # Go依赖校验文件，依赖包的校验和
-├── .gitignore            # Git忽略文件，定义不提交到版本控制的文件
-├── Dockerfile            # Docker构建文件，用于构建Docker镜像
-└── README.md             # 后端服务说明文档，项目说明和使用指南
+├── .DS_Store                          # macOS 访达生成的缓存文件，可忽略
+├── .idea/                             # GoLand/IDEA 的工程配置
+├── README.md                          # 后端服务的使用说明与启动指引
+├── cmd/                               # 应用入口所在目录
+│   └── main.go                        # Go 主程序入口，初始化依赖并启动 HTTP 服务
+├── config/                            # 配置文件目录
+│   ├── config.example.yaml            # 配置示例，列出所有关键配置项
+│   └── config.yaml                    # 本地默认配置，供开发环境使用
+├── docs/                              # 后端使用的生成型文档
+│   └── swagger/                       # Swagger 产物目录
+│       ├── README.md                  # Swagger 文档的使用说明
+│       ├── docs.go                    # swag 工具生成的 Go 注解文件
+│       ├── swagger.json               # Swagger JSON 规格文件
+│       └── swagger.yaml               # Swagger YAML 规格文件
+├── go.mod                             # Go 模块定义，声明依赖与模块名
+├── go.sum                             # Go 依赖的校验和记录
+├── internal/                          # 仅供内部使用的业务代码
+│   ├── .DS_Store                      # Finder 缓存文件，可忽略
+│   ├── config/                        # 配置读取逻辑
+│   │   ├── config.go                  # 配置结构体定义
+│   │   └── loader.go                  # 读取 YAML/环境变量的加载器
+│   ├── handlers/                      # HTTP 控制器层
+│   │   ├── README.md                  # Handler 层开发约定
+│   │   ├── auth_handler.go            # 认证相关接口（登录、注册等）
+│   │   ├── family_handler.go          # 家庭数据的 HTTP 接口
+│   │   ├── router.go                  # 路由初始化及依赖注入
+│   │   ├── routes.go                  # 路由表与分组定义
+│   │   └── user_handler.go            # 用户信息相关接口
+│   ├── middleware/                    # HTTP 中间件集合
+│   │   └── auth.go                    # JWT 鉴权中间件
+│   ├── models/                        # 数据模型定义
+│   │   ├── family.go                  # 家庭实体及数据库映射
+│   │   └── user.go                    # 用户实体及数据库映射
+│   ├── repositories/                  # 数据访问层
+│   │   ├── family_repository.go       # 家庭表 CRUD 封装
+│   │   └── user_repository.go         # 用户表 CRUD 封装
+│   ├── services/                      # 业务逻辑层
+│   │   ├── family_service.go          # 家庭相关业务逻辑
+│   │   └── user_service.go            # 用户相关业务逻辑
+│   └── utils/                         # 通用工具集合
+│       ├── BINDING_USAGE.md           # binding 工具的使用说明
+│       ├── binding.go                 # 请求参数绑定封装
+│       ├── jwt.go                     # JWT 生成与校验工具
+│       ├── password.go                # 密码哈希与验证工具
+│       ├── response.go                # 统一响应格式输出
+│       └── validator.go               # 自定义参数校验逻辑
+├── main                               # go build 生成的本地可执行文件
+├── migrations/                        # 数据库迁移脚本（golang-migrate）
+│   ├── 001_create_update_function.down.sql  # 回滚更新触发函数
+│   ├── 001_create_update_function.up.sql    # 创建自动更新时间函数
+│   ├── 002_create_users_table.down.sql      # 回滚用户表结构
+│   ├── 002_create_users_table.up.sql        # 创建用户表
+│   ├── 003_create_families_tables.down.sql  # 回滚家庭相关表
+│   ├── 003_create_families_tables.up.sql    # 创建家庭相关表
+│   ├── 004_create_dishes_tables.down.sql    # 回滚菜品相关表
+│   ├── 004_create_dishes_tables.up.sql      # 创建菜品相关表
+│   ├── 005_create_menus_tables.down.sql     # 回滚菜单相关表
+│   ├── 005_create_menus_tables.up.sql       # 创建菜单相关表
+│   ├── 006_create_shopping_lists_tables.down.sql  # 回滚购物清单表
+│   ├── 006_create_shopping_lists_tables.up.sql    # 创建购物清单表
+│   ├── 007_create_health_records_table.down.sql   # 回滚健康记录表
+│   ├── 007_create_health_records_table.up.sql     # 创建健康记录表
+│   ├── 008_create_memberships_table.down.sql      # 回滚成员关系表
+│   ├── 008_create_memberships_table.up.sql        # 创建成员关系表
+│   ├── 009_create_ai_usage_logs_table.down.sql    # 回滚 AI 调用日志表
+│   ├── 009_create_ai_usage_logs_table.up.sql      # 创建 AI 调用日志表
+│   ├── 010_create_payment_orders_table.down.sql   # 回滚支付订单表
+│   ├── 010_create_payment_orders_table.up.sql     # 创建支付订单表
+│   ├── 011_create_system_configs_table.down.sql   # 回滚系统配置表
+│   └── 011_create_system_configs_table.up.sql     # 创建系统配置表
+├── pkg/                               # 可复用公共库
+│   └── database/                      # 数据库连接封装
+│       └── postgres.go                # PostgreSQL 实例初始化
+└── scripts/                           # 项目运维脚本
+    ├── fix_migration.sh               # 批量修正迁移文件序号的小工具
+    ├── migrate.sh                     # 运行数据库迁移的脚本
+    └── swagger.sh                     # 调用 swag 生成最新 Swagger 文档
 ```
 
 ## 目录说明
 
+### 顶层文件与目录
+- `README.md`：介绍后端服务目标、运行方式与配置方法。
+- `.idea/`：JetBrains 系列 IDE 的项目配置文件，不参与编译。
+- `.DS_Store`：macOS 自动生成的目录缓存，可忽略。
+- `go.mod` / `go.sum`：Go 模块依赖声明与校验，需与代码同步维护。
+- `main`：执行 `go build` 后产生的可执行文件，建议只在本地调试阶段存在。
+
 ### cmd/
-应用程序的入口点，包含 `main.go` 文件，负责：
-- 初始化配置
-- 初始化数据库连接
-- 初始化路由
-- 启动HTTP服务器
-
-### internal/
-内部代码目录，遵循 Go 的包可见性规则，这些代码不会被外部包导入。
-
-#### internal/config/
-配置管理模块：
-- 读取配置文件（YAML/JSON/环境变量）
-- 配置结构体定义
-- 配置验证
-
-#### internal/models/
-数据模型定义：
-- 数据库表对应的结构体
-- JSON序列化标签
-- 验证标签
-
-#### internal/handlers/
-HTTP处理器（Controller层）：
-- 接收HTTP请求
-- 参数验证
-- 调用Service层
-- 返回HTTP响应
-
-#### internal/services/
-业务逻辑层：
-- 实现核心业务逻辑
-- 调用Repository层
-- 调用外部服务（如AI服务）
-- 事务管理
-
-#### internal/repositories/
-数据访问层：
-- 数据库CRUD操作
-- SQL查询封装
-- 数据库连接管理
-
-#### internal/middleware/
-中间件：
-- 认证授权
-- 请求日志
-- 错误处理
-- 跨域处理
-- 参数验证
-
-#### internal/utils/
-工具函数：
-- JWT生成和验证
-- 密码加密和验证
-- 响应格式化
-- 日志工具
-
-### pkg/
-可复用的公共包，可以被外部项目导入：
-- 数据库连接封装
-- 错误类型定义
-- 通用工具函数
-
-### migrations/
-数据库迁移脚本：
-- 使用 `golang-migrate` 或类似工具
-- 每个迁移包含 up 和 down 脚本
-- 版本化管理数据库结构变更
+存放应用入口。`main.go` 负责：加载配置、初始化数据库与依赖、注册路由、启动 HTTP 服务。
 
 ### config/
-配置文件目录：
-- 开发环境配置
-- 生产环境配置示例
-- 配置文件模板
+集中存放 YAML 配置文件：
+- `config.example.yaml` 提供完整字段的示例以便团队成员参考。
+- `config.yaml` 为当前默认开发环境配置，可根据需要调整环境变量覆盖。
 
-### tests/
-测试文件：
-- 单元测试
-- 集成测试
-- 测试工具和辅助函数
+### docs/swagger/
+Swag 命令生成的描述文件，提供 API 文档产物：
+- `docs.go` 用于在 Go 应用内注册 Swagger 元数据。
+- `swagger.json`/`swagger.yaml` 发布到外部或文档平台。
+- `README.md` 记录如何生成与查看 Swagger。
 
-## 文件命名规范
+### internal/
+Go 模块的核心业务逻辑所在，也是项目最多文件的目录：
+- `config/`：`config.go` 与 `loader.go` 负责定义配置结构并注入默认值。
+- `handlers/`：REST 接口层，定义 gin 路由及请求处理；`router.go` 构建服务器，`routes.go` 列出所有路径，`auth_handler.go`/`user_handler.go`/`family_handler.go` 等承担具体模块逻辑。
+- `middleware/`：目前仅有 `auth.go` JWT 鉴权中间件，在 `router.go` 中注册。
+- `models/`：使用 struct 定义数据库表字段以及 JSON 标签。
+- `repositories/`：封装数据库访问，便于在 service 层通过接口调用。
+- `services/`：承载业务逻辑与事务控制，按实体拆分为 user/family。
+- `utils/`：自定义工具，包括参数绑定、JWT、密码、响应包装和验证。`BINDING_USAGE.md` 解释 binding 设计思路。
 
-### Go文件
-- 使用小写字母和下划线：`user_service.go`
-- 测试文件：`user_service_test.go`
-- 主程序：`main.go`
+### migrations/
+使用 `golang-migrate` 的 SQL 脚本，严格按数字前缀排序，每个变更都有 up/down 成对文件。执行脚本请使用 `scripts/migrate.sh` 以保证顺序正确。
 
-### 包命名
-- 使用小写字母，简短且有意义
-- 避免使用下划线或混合大小写
-- 单数形式：`user` 而不是 `users`
+### pkg/
+放置可以被其他模块重用的包，目前包含 `database/postgres.go`，负责连接池创建与复用，供 repository 层注入。
 
-### 结构体命名
-- 使用PascalCase：`User`, `FamilyRecipe`
-- 导出结构体首字母大写
+### scripts/
+自动化运维脚本：
+- `migrate.sh`：根据 `.env`/配置运行数据库迁移。
+- `swagger.sh`：执行 `swag init` 并刷新 `docs/swagger` 内容。
+- `fix_migration.sh`：辅助处理错误编号或批量改名，避免手动操作失误。
 
-### 函数命名
-- 导出函数使用PascalCase：`GetUser()`
-- 私有函数使用camelCase：`validateUser()`
-
-## 代码组织原则
-
-1. **分层架构**：
-   - Handler层：处理HTTP请求
-   - Service层：业务逻辑
-   - Repository层：数据访问
-
-2. **依赖注入**：
-   - 通过构造函数注入依赖
-   - 便于测试和扩展
-
-3. **错误处理**：
-   - 使用自定义错误类型
-   - 统一的错误响应格式
-
-4. **配置管理**：
-   - 使用配置文件和环境变量
-   - 支持多环境配置
-
-5. **日志记录**：
-   - 结构化日志
-   - 不同级别的日志输出
-
-## 开发规范
-
-### 导入顺序
-```go
-import (
-    // 标准库
-    "fmt"
-    "net/http"
-    
-    // 第三方库
-    "github.com/gin-gonic/gin"
-    "github.com/lib/pq"
-    
-    // 内部包
-    "onetaste-family/backend/internal/models"
-    "onetaste-family/backend/internal/services"
-)
-```
-
-### 错误处理
-```go
-if err != nil {
-    log.Errorf("failed to get user: %v", err)
-    return nil, fmt.Errorf("get user failed: %w", err)
-}
-```
-
-### 注释规范
-- 导出函数和类型必须有注释
-- 注释以被注释对象名称开头
-- 使用完整的句子
-
-## 相关文档
-
-- [API接口文档](./接口文档.md)
-- [数据库设计文档](./数据库设计.md)
-- [部署文档](./部署文档.md)
-
+如需新增目录或文件，请同步更新本文件中的树形结构与说明，以保持文档与源码一致。

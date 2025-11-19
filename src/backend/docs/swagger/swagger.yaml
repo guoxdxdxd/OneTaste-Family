@@ -1,5 +1,116 @@
 basePath: /api/v1
 definitions:
+  models.CreateFamilyRequest:
+    properties:
+      description:
+        description: 家庭描述，可选
+        example: 温馨的家庭
+        maxLength: 500
+        type: string
+      name:
+        description: 家庭名称
+        example: 张家的厨房
+        maxLength: 100
+        type: string
+    required:
+    - name
+    type: object
+  models.FamilyInfoResponse:
+    properties:
+      description:
+        example: 温馨的家庭
+        type: string
+      dish_count:
+        example: 15
+        type: integer
+      family_id:
+        example: 1
+        type: integer
+      max_dishes:
+        example: 30
+        type: integer
+      member_count:
+        example: 3
+        type: integer
+      name:
+        example: 张家的厨房
+        type: string
+      owner_id:
+        example: 1001
+        type: integer
+    type: object
+  models.FamilyInviteRequest:
+    properties:
+      action:
+        example: accept
+        type: string
+      family_id:
+        example: 1
+        type: integer
+      family_name:
+        example: 张家的厨房
+        type: string
+      inviter_id:
+        example: 1001
+        type: integer
+      inviter_nickname:
+        example: 张三
+        type: string
+    required:
+    - action
+    - family_id
+    - family_name
+    - inviter_id
+    - inviter_nickname
+    type: object
+  models.FamilyJoinResponse:
+    properties:
+      family_id:
+        example: 1
+        type: integer
+      joined_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      member_role:
+        example: member
+        type: string
+    type: object
+  models.FamilyMemberInfo:
+    properties:
+      avatar:
+        example: https://.../avatar.jpg
+        type: string
+      joined_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      nickname:
+        example: 李四
+        type: string
+      role:
+        example: member
+        type: string
+      user_id:
+        example: 1002
+        type: integer
+    type: object
+  models.FamilyResponse:
+    properties:
+      description:
+        example: 温馨的家庭
+        type: string
+      family_id:
+        example: 1
+        type: integer
+      max_dishes:
+        example: 30
+        type: integer
+      member_count:
+        example: 1
+        type: integer
+      name:
+        example: 张家的厨房
+        type: string
+    type: object
   models.LoginRequest:
     description: 用户登录请求参数
     properties:
@@ -220,6 +331,162 @@ paths:
       summary: 用户注册
       tags:
       - 用户认证
+  /family/create:
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的家庭，创建者自动成为owner并加入家庭。需要Bearer Token认证。
+      parameters:
+      - description: 创建家庭请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateFamilyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.FamilyResponse'
+              type: object
+        "400":
+          description: 请求参数错误或已加入家庭
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: 未授权或Token无效
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 创建家庭
+      tags:
+      - 家庭
+  /family/info:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户所属家庭信息，包括成员数量与菜式数量。需要Bearer Token认证。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.FamilyInfoResponse'
+              type: object
+        "401":
+          description: 未授权或Token无效
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: 尚未创建或加入家庭
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取家庭信息
+      tags:
+      - 家庭
+  /family/member/invite:
+    post:
+      consumes:
+      - application/json
+      description: 用户在前端点击“同意”后调用该接口，加入邀请人所在家庭。需要Bearer Token认证。
+      parameters:
+      - description: 扫码加入家庭请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.FamilyInviteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 加入成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.FamilyJoinResponse'
+              type: object
+        "400":
+          description: 参数错误或业务限制
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: 未授权或Token无效
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: 家庭不存在或邀请无效
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 扫码加入家庭
+      tags:
+      - 家庭
+  /family/members:
+    get:
+      consumes:
+      - application/json
+      description: 返回当前用户所属家庭的成员列表。需要Bearer Token认证。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.FamilyMemberInfo'
+                  type: array
+              type: object
+        "401":
+          description: 未授权或Token无效
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: 尚未创建或加入家庭
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取家庭成员列表
+      tags:
+      - 家庭
   /health:
     get:
       consumes:
@@ -256,6 +523,10 @@ paths:
               type: object
         "401":
           description: 未授权或Token无效
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: 用户不存在
           schema:
             $ref: '#/definitions/utils.Response'
         "500":

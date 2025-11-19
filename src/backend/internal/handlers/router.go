@@ -13,7 +13,7 @@ type Router interface {
 // RegisterAuthRoutes 注册认证相关路由
 func RegisterAuthRoutes(api *gin.RouterGroup) {
 	authHandler := NewAuthHandler()
-	
+
 	auth := api.Group("/auth")
 	{
 		auth.POST("/register", authHandler.Register)
@@ -24,7 +24,7 @@ func RegisterAuthRoutes(api *gin.RouterGroup) {
 // RegisterUserRoutes 注册用户相关路由
 func RegisterUserRoutes(api *gin.RouterGroup) {
 	userHandler := NewUserHandler()
-	
+
 	user := api.Group("/user")
 	user.Use(middleware.AuthMiddleware()) // 需要认证
 	{
@@ -32,3 +32,16 @@ func RegisterUserRoutes(api *gin.RouterGroup) {
 	}
 }
 
+// RegisterFamilyRoutes 注册家庭相关路由
+func RegisterFamilyRoutes(api *gin.RouterGroup) {
+	familyHandler := NewFamilyHandler()
+
+	family := api.Group("/family")
+	family.Use(middleware.AuthMiddleware()) // 需要认证
+	{
+		family.POST("/create", familyHandler.CreateFamily)
+		family.GET("/info", familyHandler.GetFamilyInfo)
+		family.POST("/member/invite", familyHandler.JoinFamilyViaInvite)
+		family.GET("/members", familyHandler.GetFamilyMembers)
+	}
+}

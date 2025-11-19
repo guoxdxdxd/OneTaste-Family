@@ -140,6 +140,269 @@ const docTemplate = `{
                 }
             }
         },
+        "/family/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "创建一个新的家庭，创建者自动成为owner并加入家庭。需要Bearer Token认证。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "家庭"
+                ],
+                "summary": "创建家庭",
+                "parameters": [
+                    {
+                        "description": "创建家庭请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateFamilyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.FamilyResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误或已加入家庭",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/family/info": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前用户所属家庭信息，包括成员数量与菜式数量。需要Bearer Token认证。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "家庭"
+                ],
+                "summary": "获取家庭信息",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.FamilyInfoResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "尚未创建或加入家庭",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/family/member/invite": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "用户在前端点击“同意”后调用该接口，加入邀请人所在家庭。需要Bearer Token认证。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "家庭"
+                ],
+                "summary": "扫码加入家庭",
+                "parameters": [
+                    {
+                        "description": "扫码加入家庭请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FamilyInviteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "加入成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.FamilyJoinResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误或业务限制",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "家庭不存在或邀请无效",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/family/members": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "返回当前用户所属家庭的成员列表。需要Bearer Token认证。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "家庭"
+                ],
+                "summary": "获取家庭成员列表",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.FamilyMemberInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "尚未创建或加入家庭",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "检查服务是否正常运行",
@@ -209,6 +472,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/utils.Response"
                         }
                     },
+                    "404": {
+                        "description": "用户不存在",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
@@ -220,6 +489,158 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.CreateFamilyRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "description": "家庭描述，可选",
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "温馨的家庭"
+                },
+                "name": {
+                    "description": "家庭名称",
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "张家的厨房"
+                }
+            }
+        },
+        "models.FamilyInfoResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "温馨的家庭"
+                },
+                "dish_count": {
+                    "type": "integer",
+                    "example": 15
+                },
+                "family_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "max_dishes": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "member_count": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "name": {
+                    "type": "string",
+                    "example": "张家的厨房"
+                },
+                "owner_id": {
+                    "type": "integer",
+                    "example": 1001
+                }
+            }
+        },
+        "models.FamilyInviteRequest": {
+            "type": "object",
+            "required": [
+                "action",
+                "family_id",
+                "family_name",
+                "inviter_id",
+                "inviter_nickname"
+            ],
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "example": "accept"
+                },
+                "family_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "family_name": {
+                    "type": "string",
+                    "example": "张家的厨房"
+                },
+                "inviter_id": {
+                    "type": "integer",
+                    "example": 1001
+                },
+                "inviter_nickname": {
+                    "type": "string",
+                    "example": "张三"
+                }
+            }
+        },
+        "models.FamilyJoinResponse": {
+            "type": "object",
+            "properties": {
+                "family_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "joined_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "member_role": {
+                    "type": "string",
+                    "example": "member"
+                }
+            }
+        },
+        "models.FamilyMemberInfo": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string",
+                    "example": "https://.../avatar.jpg"
+                },
+                "joined_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "nickname": {
+                    "type": "string",
+                    "example": "李四"
+                },
+                "role": {
+                    "type": "string",
+                    "example": "member"
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1002
+                }
+            }
+        },
+        "models.FamilyResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "温馨的家庭"
+                },
+                "family_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "max_dishes": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "member_count": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "张家的厨房"
+                }
+            }
+        },
         "models.LoginRequest": {
             "description": "用户登录请求参数",
             "type": "object",
