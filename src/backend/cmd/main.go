@@ -8,11 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	
+
 	_ "onetaste-family/backend/docs/swagger" // 导入生成的 Swagger 文档
 	"onetaste-family/backend/internal/config"
 	"onetaste-family/backend/internal/handlers"
+	"onetaste-family/backend/pkg/cache"
 	"onetaste-family/backend/pkg/database"
+	"onetaste-family/backend/pkg/storage"
 )
 
 // @title           OneTaste Family API
@@ -44,6 +46,21 @@ func main() {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
+	// 初始化 MinIO 客户端
+	minioCfg := storage.MinIOConfig{
+		Endpoint:  config.AppConfig.MinIO.Endpoint,
+		AccessKey: config.AppConfig.MinIO.AccessKey,
+		SecretKey: config.AppConfig.MinIO.SecretKey,
+		Bucket:    config.AppConfig.MinIO.Bucket,
+		Region:    config.AppConfig.MinIO.Region,
+		UseSSL:    config.AppConfig.MinIO.UseSSL,
+		BaseURL:   config.AppConfig.MinIO.BaseURL,
+	}
+
+	if err := storage.InitMinIO(minioCfg); err != nil {
+		log.Fatalf("Failed to initialize MinIO: %v", err)
+	}
+
 	// 初始化数据库连接
 	dbCfg := database.Config{
 		Host:            config.AppConfig.Database.Host,
@@ -64,6 +81,20 @@ func main() {
 	defer database.Close()
 
 	log.Println("Database connected successfully")
+
+	// 初始化 Redis
+	redisCfg := cache.RedisConfig{
+		Host:     config.AppConfig.Redis.Host,
+		Port:     config.AppConfig.Redis.Port,
+		Password: config.AppConfig.Redis.Password,
+		DB:       config.AppConfig.Redis.DB,
+	}
+
+	if err := cache.InitRedis(redisCfg); err != nil {
+		log.Fatalf("Failed to connect to Redis: %v", err)
+	}
+	defer cache.CloseRedis()
+	log.Println("Redis connected successfully")
 
 	// 设置Gin模式
 	if config.AppConfig.Server.Mode == "release" {
@@ -123,4 +154,3 @@ func corsMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
-

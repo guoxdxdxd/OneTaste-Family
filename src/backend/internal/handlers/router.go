@@ -16,6 +16,7 @@ func RegisterAuthRoutes(api *gin.RouterGroup) {
 
 	auth := api.Group("/auth")
 	{
+		auth.GET("/captcha", authHandler.GetCaptcha)
 		auth.POST("/register", authHandler.Register)
 		auth.POST("/login", authHandler.Login)
 	}
@@ -58,5 +59,16 @@ func RegisterDishRoutes(api *gin.RouterGroup) {
 		dishes.GET("/:id", dishHandler.GetDishDetail)
 		dishes.PUT("/:id", dishHandler.UpdateDish)
 		dishes.DELETE("/:id", dishHandler.DeleteDish)
+	}
+}
+
+// RegisterMediaRoutes 注册媒体上传路由
+func RegisterMediaRoutes(api *gin.RouterGroup) {
+	mediaHandler := NewMediaHandler()
+
+	media := api.Group("/media")
+	media.Use(middleware.AuthMiddleware())
+	{
+		media.POST("/upload", mediaHandler.UploadMedia)
 	}
 }

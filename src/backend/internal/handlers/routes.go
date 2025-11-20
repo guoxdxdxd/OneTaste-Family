@@ -15,6 +15,7 @@ func RegisterAllRoutes(r *gin.Engine) {
 		RegisterUserRoutes(api)   // 用户路由（需要认证）
 		RegisterFamilyRoutes(api) // 家庭路由
 		RegisterDishRoutes(api)   // 菜式路由
+		RegisterMediaRoutes(api)  // 文件上传路由
 		// 后续添加新模块时，只需要在这里添加一行即可
 		// RegisterDishRoutes(api)     // 菜式路由
 		// RegisterMenuRoutes(api)     // 菜单路由

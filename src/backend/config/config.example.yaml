@@ -28,3 +28,11 @@ jwt:
   secret: "your-secret-key-change-in-production"
   expiration: 24h  # 24小时
 
+minio:
+  endpoint: "127.0.0.1:9000"          # MinIO 服务地址（host:port，不含协议）
+  access_key: "minioadmin"            # Access Key（MINIO_ROOT_USER）
+  secret_key: "ChangeMe123!"          # Secret Key（MINIO_ROOT_PASSWORD）
+  bucket: "onetaste-media"            # 默认存储桶
+  region: ""                          # 可选：MinIO 区域
+  use_ssl: false                      # 如果通过 https 访问则设为 true
+  base_url: "http://127.0.0.1:9000"   # 对外访问地址（或公网 IP/域名）

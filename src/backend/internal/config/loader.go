@@ -54,10 +54,20 @@ func loadDefaultConfig() error {
 			Secret:     "your-secret-key-change-in-production",
 			Expiration: 24 * time.Hour, // 24小时
 		},
+		MinIO: MinIOConfig{
+			Endpoint:  "localhost:9000",
+			AccessKey: "minioadmin",
+			SecretKey: "minioadmin",
+			Bucket:    "onetaste-media",
+			Region:    "",
+			UseSSL:    false,
+			BaseURL:   "http://localhost:9000",
+		},
 	}
 
 	// 从环境变量覆盖配置
 	loadFromEnv()
+	ensureMinioDefaults()
 
 	return nil
 }
@@ -84,4 +94,3 @@ func GetConfigPath() string {
 
 	return configPath
 }
-

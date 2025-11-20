@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -9,31 +10,22 @@ import (
 	"onetaste-family/backend/internal/utils"
 )
 
-var (
-	// ErrInvalidVerifyCode 验证码错误
-	ErrInvalidVerifyCode = errors.New("invalid verify code")
-	// ErrPhoneExists 手机号已存在
-	ErrPhoneExists = errors.New("phone already exists")
-	// ErrInvalidCredentials 用户名或密码错误
-	ErrInvalidCredentials = errors.New("invalid credentials")
-	// ErrUserNotFound 用户不存在
-	ErrUserNotFound = errors.New("user not found")
-)
-
 // UserService 用户业务逻辑层
 type UserService struct {
-	userRepo *repositories.UserRepository
+	userRepo       *repositories.UserRepository
+	captchaService *CaptchaService
 }
 
 // NewUserService 创建用户Service
 func NewUserService() *UserService {
 	return &UserService{
-		userRepo: repositories.NewUserRepository(),
+		userRepo:       repositories.NewUserRepository(),
+		captchaService: NewCaptchaService(),
 	}
 }
 
 // Register 用户注册
-func (s *UserService) Register(req *models.RegisterRequest) (*models.RegisterResponse, error) {
+func (s *UserService) Register(ctx context.Context, req *models.RegisterRequest) (*models.RegisterResponse, error) {
 	// 验证手机号格式
 	if !utils.ValidatePhone(req.Phone) {
 		return nil, fmt.Errorf("invalid phone format")
@@ -44,9 +36,16 @@ func (s *UserService) Register(req *models.RegisterRequest) (*models.RegisterRes
 		return nil, fmt.Errorf("password must be at least 6 characters")
 	}
 
-	// 验证验证码（暂时使用简单验证，后续可接入短信服务）
-	if !s.validateVerifyCode(req.Phone, req.VerifyCode) {
-		return nil, ErrInvalidVerifyCode
+	// 验证图形验证码
+	if err := s.captchaService.ValidateCaptcha(ctx, req.CaptchaKey, req.VerifyCode); err != nil {
+		switch {
+		case errors.Is(err, ErrCaptchaExpired):
+			return nil, ErrCaptchaExpired
+		case errors.Is(err, ErrInvalidVerifyCode):
+			return nil, ErrInvalidVerifyCode
+		default:
+			return nil, fmt.Errorf("failed to validate captcha: %w", err)
+		}
 	}
 
 	// 检查手机号是否已存在
@@ -149,18 +148,4 @@ func (s *UserService) GetUserInfo(userID string) (*models.UserInfoResponse, erro
 		Avatar:     user.Avatar,
 		Membership: membership,
 	}, nil
-}
-
-// validateVerifyCode 验证验证码
-// TODO: 后续接入短信服务，从Redis获取验证码
-// 目前为了开发方便，使用固定验证码 "123456" 或从环境变量读取
-func (s *UserService) validateVerifyCode(phone, code string) bool {
-	// 开发环境：允许使用固定验证码
-	// 生产环境：从Redis获取验证码并验证
-	// 这里先实现一个简单版本，后续可以接入短信服务
-	if code == "123456" {
-		return true
-	}
-	// TODO: 从Redis获取验证码并验证
-	return false
 }

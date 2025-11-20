@@ -660,16 +660,20 @@ watch(
   display: flex;
   gap: 16px;
   margin-top: 16px;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .qr-box {
-  width: 160px;
-  height: 160px;
+  width: 220px;
+  height: 220px;
+  max-width: 100%;
+  max-height: 100%;
   border-radius: var(--radius-medium);
   overflow: hidden;
   border: 1px solid var(--color-border);
   background: #fff;
+  flex: 0 0 220px;
 }
 
 .qr-box img {
@@ -679,14 +683,17 @@ watch(
 }
 
 .qr-placeholder {
-  width: 160px;
-  height: 160px;
+  width: 220px;
+  height: 220px;
+  max-width: 100%;
+  max-height: 100%;
   border-radius: var(--radius-medium);
   border: 1px dashed var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--color-text-secondary);
+  flex: 0 0 220px;
 }
 
 .qr-area ul {
@@ -694,6 +701,7 @@ watch(
   padding-left: 18px;
   color: var(--color-text-secondary);
   line-height: 1.5;
+  flex: 1 1 200px;
 }
 
 .followup h2 {
@@ -704,10 +712,6 @@ watch(
   .hero {
     flex-direction: row;
     justify-content: space-between;
-  }
-
-  .qr-area {
-    align-items: flex-start;
   }
 }
 </style>

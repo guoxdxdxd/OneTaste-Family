@@ -88,6 +88,17 @@ migrate -path ./migrations -database "postgres://user:password@localhost:5432/on
 go run cmd/main.go
 ```
 
+## 媒体文件上传
+
+- 接口：`POST /api/v1/media/upload`（需 Bearer Token）
+- 请求：`multipart/form-data`，字段包括  
+  - `file`：要上传的文件，仅支持常见图片（JPG/PNG/WebP/GIF/SVG）  
+  - `path`：文件目录前缀，由前端控制，例如：
+    - `/user/head/{userId}`：该用户历史头像
+    - `/family/head/{familyId}`：家庭头像
+    - `/family/{familyId}/dishes/{dishId}`：指定菜式图片
+- 后端会在该目录下生成 `ULID + 扩展名` 的文件名并上传至 MinIO，接口返回可直接访问的 URL 与对象路径，便于后续覆盖或清理。
+
 ## 构建
 
 ```bash

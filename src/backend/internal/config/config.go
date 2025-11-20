@@ -2,10 +2,11 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 	"time"
 
 	"gopkg.in/yaml.v3"
-	"os"
 )
 
 // Config 应用配置结构
@@ -14,6 +15,7 @@ type Config struct {
 	Database DatabaseConfig `yaml:"database"`
 	Redis    RedisConfig    `yaml:"redis"`
 	JWT      JWTConfig      `yaml:"jwt"`
+	MinIO    MinIOConfig    `yaml:"minio"`
 }
 
 // ServerConfig 服务器配置
@@ -33,7 +35,7 @@ type DatabaseConfig struct {
 	SSLMode         string        `yaml:"sslmode"`
 	MaxOpenConns    int           `yaml:"max_open_conns"`
 	MaxIdleConns    int           `yaml:"max_idle_conns"`
-	ConnMaxLifetime time.Duration `yaml:"conn_max_lifetime"` // 支持 "300s", "5m" 等格式
+	ConnMaxLifetime time.Duration `yaml:"conn_max_lifetime"`  // 支持 "300s", "5m" 等格式
 	ConnMaxIdleTime time.Duration `yaml:"conn_max_idle_time"` // 支持 "60s", "1m" 等格式
 }
 
@@ -49,6 +51,17 @@ type RedisConfig struct {
 type JWTConfig struct {
 	Secret     string        `yaml:"secret"`
 	Expiration time.Duration `yaml:"expiration"`
+}
+
+// MinIOConfig 对象存储配置
+type MinIOConfig struct {
+	Endpoint  string `yaml:"endpoint"`
+	AccessKey string `yaml:"access_key"`
+	SecretKey string `yaml:"secret_key"`
+	Bucket    string `yaml:"bucket"`
+	Region    string `yaml:"region"`
+	UseSSL    bool   `yaml:"use_ssl"`
+	BaseURL   string `yaml:"base_url"`
 }
 
 var AppConfig *Config
@@ -67,6 +80,7 @@ func Load(configPath string) error {
 
 	// 从环境变量覆盖配置（如果存在）
 	loadFromEnv()
+	ensureMinioDefaults()
 
 	return nil
 }
@@ -91,6 +105,52 @@ func loadFromEnv() {
 	if jwtSecret := os.Getenv("JWT_SECRET"); jwtSecret != "" {
 		AppConfig.JWT.Secret = jwtSecret
 	}
+	if minioEndpoint := os.Getenv("MINIO_ENDPOINT"); minioEndpoint != "" {
+		AppConfig.MinIO.Endpoint = minioEndpoint
+	}
+	if minioAccessKey := os.Getenv("MINIO_ROOT_USER"); minioAccessKey != "" {
+		AppConfig.MinIO.AccessKey = minioAccessKey
+	} else if minioAccessKey := os.Getenv("MINIO_ACCESS_KEY"); minioAccessKey != "" {
+		AppConfig.MinIO.AccessKey = minioAccessKey
+	}
+	if minioSecret := os.Getenv("MINIO_ROOT_PASSWORD"); minioSecret != "" {
+		AppConfig.MinIO.SecretKey = minioSecret
+	} else if minioSecret := os.Getenv("MINIO_SECRET_KEY"); minioSecret != "" {
+		AppConfig.MinIO.SecretKey = minioSecret
+	}
+	if minioBucket := os.Getenv("MINIO_BUCKET"); minioBucket != "" {
+		AppConfig.MinIO.Bucket = minioBucket
+	}
+	if minioRegion := os.Getenv("MINIO_REGION"); minioRegion != "" {
+		AppConfig.MinIO.Region = minioRegion
+	}
+	if minioUseSSL := os.Getenv("MINIO_USE_SSL"); minioUseSSL != "" {
+		if parsed, err := strconv.ParseBool(minioUseSSL); err == nil {
+			AppConfig.MinIO.UseSSL = parsed
+		}
+	}
+	if minioBaseURL := os.Getenv("MINIO_SERVER_URL"); minioBaseURL != "" {
+		AppConfig.MinIO.BaseURL = minioBaseURL
+	} else if minioBaseURL := os.Getenv("MINIO_BASE_URL"); minioBaseURL != "" {
+		AppConfig.MinIO.BaseURL = minioBaseURL
+	}
+}
+
+// ensureMinioDefaults 确保 MinIO 配置存在合理默认值
+func ensureMinioDefaults() {
+	if AppConfig.MinIO.Endpoint == "" {
+		AppConfig.MinIO.Endpoint = "localhost:9000"
+	}
+	if AppConfig.MinIO.Bucket == "" {
+		AppConfig.MinIO.Bucket = "onetaste-media"
+	}
+	if AppConfig.MinIO.BaseURL == "" && AppConfig.MinIO.Endpoint != "" {
+		scheme := "http"
+		if AppConfig.MinIO.UseSSL {
+			scheme = "https"
+		}
+		AppConfig.MinIO.BaseURL = fmt.Sprintf("%s://%s", scheme, AppConfig.MinIO.Endpoint)
+	}
 }
 
 // GetDatabaseDSN 获取数据库连接字符串
@@ -105,4 +165,3 @@ func (c *Config) GetDatabaseDSN() string {
 		c.Database.SSLMode,
 	)
 }
-

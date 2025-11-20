@@ -11,14 +11,41 @@ import (
 
 // AuthHandler 认证处理器
 type AuthHandler struct {
-	userService *services.UserService
+	userService    *services.UserService
+	captchaService *services.CaptchaService
 }
 
 // NewAuthHandler 创建认证处理器
 func NewAuthHandler() *AuthHandler {
 	return &AuthHandler{
-		userService: services.NewUserService(),
+		userService:    services.NewUserService(),
+		captchaService: services.NewCaptchaService(),
 	}
+}
+
+// GetCaptcha 获取图形验证码
+// @Summary 获取图形验证码
+// @Description 获取一个带干扰的图形验证码图片及对应的编码
+// @Tags 用户认证
+// @Param width query int false "图片宽度（120-360），默认220"
+// @Param height query int false "图片高度（40-160），默认70"
+// @Produce json
+// @Success 200 {object} utils.Response{data=models.CaptchaResponse} "验证码获取成功"
+// @Failure 500 {object} utils.Response "服务器内部错误"
+// @Router /auth/captcha [get]
+func (h *AuthHandler) GetCaptcha(c *gin.Context) {
+	opts, err := utils.BindQuery[models.CaptchaRequest](c)
+	if err != nil {
+		return
+	}
+
+	resp, err := h.captchaService.GenerateCaptcha(c.Request.Context(), opts)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.InternalServerError("获取验证码失败"))
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.Success(resp))
 }
 
 // Register 用户注册
@@ -38,12 +65,15 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return // 错误已经在BindJSON中处理并返回响应
 	}
 
-	resp, err := h.userService.Register(req)
+	resp, err := h.userService.Register(c.Request.Context(), req)
 	if err != nil {
 		// 根据错误类型返回不同的状态码
 		switch err {
+		case services.ErrCaptchaExpired:
+			c.JSON(http.StatusBadRequest, utils.BadRequest("验证码已过期"))
+			return
 		case services.ErrInvalidVerifyCode:
-			c.JSON(http.StatusBadRequest, utils.BadRequest("验证码错误"))
+			c.JSON(http.StatusBadRequest, utils.BadRequest("验证码不正确"))
 			return
 		case services.ErrPhoneExists:
 			c.JSON(http.StatusBadRequest, utils.BadRequest("手机号已注册"))

@@ -24,6 +24,58 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/captcha": {
+            "get": {
+                "description": "获取一个带干扰的图形验证码图片及对应的编码",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户认证"
+                ],
+                "summary": "获取图形验证码",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "图片宽度（120-360），默认220",
+                        "name": "width",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "图片高度（40-160），默认70",
+                        "name": "height",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "验证码获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CaptchaResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "用户登录接口，支持手机号和密码登录。登录成功后返回用户ID、JWT Token和过期时间。",
@@ -317,7 +369,7 @@ const docTemplate = `{
                 "summary": "获取菜式详情",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "菜式ID",
                         "name": "id",
                         "in": "path",
@@ -382,7 +434,7 @@ const docTemplate = `{
                 "summary": "更新菜式",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "菜式ID",
                         "name": "id",
                         "in": "path",
@@ -468,7 +520,7 @@ const docTemplate = `{
                 "summary": "删除菜式",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "菜式ID",
                         "name": "id",
                         "in": "path",
@@ -798,6 +850,80 @@ const docTemplate = `{
                 }
             }
         },
+        "/media/upload": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "上传图片等媒体文件，并返回可访问地址。需要 Bearer Token。",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "媒体"
+                ],
+                "summary": "上传媒体文件",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "待上传文件",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "文件目录前缀，例如 /user/head/{userId}、/family/{familyId}/dishes/{dishId}",
+                        "name": "path",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.MediaUploadResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/user/info": {
             "get": {
                 "security": [
@@ -858,6 +984,27 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.CaptchaResponse": {
+            "description": "图形验证码返回数据",
+            "type": "object",
+            "properties": {
+                "captcha_key": {
+                    "description": "验证码编码",
+                    "type": "string",
+                    "example": "01J0XYZABCD1234EFG567HIJK"
+                },
+                "expire_in": {
+                    "description": "过期时间（秒）",
+                    "type": "integer",
+                    "example": 30
+                },
+                "image_base64": {
+                    "description": "图形验证码Base64",
+                    "type": "string",
+                    "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."
+                }
+            }
+        },
         "models.CookingStep": {
             "type": "object",
             "properties": {
@@ -871,7 +1018,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "step_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -959,7 +1106,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "dish_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
@@ -979,7 +1126,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "dish_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "image_url": {
                     "type": "string"
@@ -1034,7 +1181,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "dish_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "image_url": {
                     "type": "string"
@@ -1059,8 +1206,8 @@ const docTemplate = `{
                     "example": 15
                 },
                 "family_id": {
-                    "type": "integer",
-                    "example": 1
+                    "type": "string",
+                    "example": "01HZX1YF8Y6S7K4V9Q2J3M5N6P"
                 },
                 "max_dishes": {
                     "type": "integer",
@@ -1075,8 +1222,8 @@ const docTemplate = `{
                     "example": "张家的厨房"
                 },
                 "owner_id": {
-                    "type": "integer",
-                    "example": 1001
+                    "type": "string",
+                    "example": "01HZX1YF8Y6S7K4V9Q2J3M5N6Q"
                 }
             }
         },
@@ -1095,16 +1242,16 @@ const docTemplate = `{
                     "example": "accept"
                 },
                 "family_id": {
-                    "type": "integer",
-                    "example": 1
+                    "type": "string",
+                    "example": "01HZX1YF8Y6S7K4V9Q2J3M5N6P"
                 },
                 "family_name": {
                     "type": "string",
                     "example": "张家的厨房"
                 },
                 "inviter_id": {
-                    "type": "integer",
-                    "example": 1001
+                    "type": "string",
+                    "example": "01HZX1YF8Y6S7K4V9Q2J3M5N6Q"
                 },
                 "inviter_nickname": {
                     "type": "string",
@@ -1116,8 +1263,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "family_id": {
-                    "type": "integer",
-                    "example": 1
+                    "type": "string",
+                    "example": "01HZX1YF8Y6S7K4V9Q2J3M5N6P"
                 },
                 "joined_at": {
                     "type": "string",
@@ -1149,8 +1296,8 @@ const docTemplate = `{
                     "example": "member"
                 },
                 "user_id": {
-                    "type": "integer",
-                    "example": 1002
+                    "type": "string",
+                    "example": "01HZX1YF8Y6S7K4V9Q2J3M5N6R"
                 }
             }
         },
@@ -1162,8 +1309,8 @@ const docTemplate = `{
                     "example": "温馨的家庭"
                 },
                 "family_id": {
-                    "type": "integer",
-                    "example": 1
+                    "type": "string",
+                    "example": "01HZX1YF8Y6S7K4V9Q2J3M5N6P"
                 },
                 "max_dishes": {
                     "type": "integer",
@@ -1189,7 +1336,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "ingredient_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
@@ -1276,8 +1423,34 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "description": "用户ID",
-                    "type": "integer",
-                    "example": 1
+                    "type": "string",
+                    "example": "01HZX1YF8Y6S7K4V9Q2J3M5N6P"
+                }
+            }
+        },
+        "models.MediaUploadResponse": {
+            "type": "object",
+            "properties": {
+                "bucket": {
+                    "type": "string"
+                },
+                "content_type": {
+                    "type": "string"
+                },
+                "directory": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "object_key": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },
@@ -1301,12 +1474,18 @@ const docTemplate = `{
             "description": "用户注册请求参数",
             "type": "object",
             "required": [
+                "captcha_key",
                 "nickname",
                 "password",
                 "phone",
                 "verify_code"
             ],
             "properties": {
+                "captcha_key": {
+                    "description": "验证码编码",
+                    "type": "string",
+                    "example": "01J0XYZABCD1234EFG567HIJK"
+                },
                 "nickname": {
                     "description": "昵称",
                     "type": "string",
@@ -1324,9 +1503,9 @@ const docTemplate = `{
                     "example": "13800138000"
                 },
                 "verify_code": {
-                    "description": "验证码，6位数字",
+                    "description": "图形验证码内容，不区分大小写",
                     "type": "string",
-                    "example": "123456"
+                    "example": "A9d3"
                 }
             }
         },
@@ -1341,8 +1520,8 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "description": "用户ID",
-                    "type": "integer",
-                    "example": 1
+                    "type": "string",
+                    "example": "01HZX1YF8Y6S7K4V9Q2J3M5N6P"
                 }
             }
         },
@@ -1413,8 +1592,8 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "description": "用户ID",
-                    "type": "integer",
-                    "example": 1
+                    "type": "string",
+                    "example": "01HZX1YF8Y6S7K4V9Q2J3M5N6P"
                 }
             }
         },

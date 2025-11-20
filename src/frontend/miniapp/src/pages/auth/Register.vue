@@ -24,27 +24,6 @@
         </div>
 
         <div class="form-group">
-          <label for="verify_code">验证码</label>
-          <div class="verify-row">
-            <input
-              id="verify_code"
-              v-model="form.verify_code"
-              type="text"
-              :class="{ error: errors.verify_code }"
-              placeholder="请输入验证码"
-              maxlength="6"
-              @blur="validateVerifyCode"
-              @input="clearError('verify_code')"
-            />
-            <button type="button" class="ghost" :disabled="codeCountdown > 0 || loading" @click="sendVerifyCode">
-              <span v-if="codeCountdown > 0">{{ codeCountdown }}秒</span>
-              <span v-else>发送验证码</span>
-            </button>
-          </div>
-          <span v-if="errors.verify_code" class="error-message">{{ errors.verify_code }}</span>
-        </div>
-
-        <div class="form-group">
           <label for="password">密码</label>
           <input
             id="password"
@@ -73,6 +52,42 @@
           <span v-if="errors.nickname" class="error-message">{{ errors.nickname }}</span>
         </div>
 
+        <div class="form-group">
+          <label for="verify_code">验证码</label>
+          <div class="verify-row">
+            <input
+              id="verify_code"
+              v-model="form.verify_code"
+              type="text"
+              :class="{ error: errors.verify_code }"
+              placeholder="请输入图形验证码"
+              maxlength="4"
+              autocomplete="off"
+              @blur="validateVerifyCode"
+              @input="handleVerifyCodeInput"
+            />
+            
+            <div class="captcha-panel">
+              <div
+                class="captcha-image"
+                :style="captchaStyle"
+                role="button"
+                tabindex="0"
+                @click="refreshCaptcha"
+              >
+                <img v-if="captcha.image" :src="captcha.image" alt="图形验证码" />
+                <span v-else class="captcha-placeholder">
+                  {{ captcha.loading ? '生成中…' : '点击获取' }}
+                </span>
+              </div>
+              <button type="button" class="ghost small" :disabled="captcha.loading" @click="refreshCaptcha">
+                {{ captcha.loading ? '生成中…' : '换一张' }}
+              </button>
+            </div>
+          </div>
+          <span v-if="errors.verify_code" class="error-message">{{ errors.verify_code }}</span>
+        </div>
+
         <div v-if="errorMessage" class="error-alert">
           {{ errorMessage }}
         </div>
@@ -92,9 +107,10 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { getCaptcha } from '@/api/user'
 import {
   getPhoneError,
   getPasswordError,
@@ -121,7 +137,27 @@ const errors = reactive({
 
 const errorMessage = ref('')
 const loading = ref(false)
-const codeCountdown = ref(0)
+
+const captchaSize = ref(getResponsiveCaptchaSize())
+const captcha = reactive({
+  key: '',
+  image: '',
+  loading: false
+})
+
+const captchaStyle = computed(() => ({
+  width: `${captchaSize.value.width}px`,
+  height: `${captchaSize.value.height}px`
+}))
+
+function getResponsiveCaptchaSize() {
+  if (typeof window === 'undefined') {
+    return { width: 200, height: 64 }
+  }
+  return window.innerWidth <= 520
+    ? { width: 160, height: 54 }
+    : { width: 200, height: 64 }
+}
 
 const validatePhone = () => {
   errors.phone = getPhoneError(form.phone)
@@ -129,6 +165,7 @@ const validatePhone = () => {
 }
 
 const validateVerifyCode = () => {
+  form.verify_code = form.verify_code.trim().toUpperCase()
   errors.verify_code = getVerifyCodeError(form.verify_code)
   return !errors.verify_code
 }
@@ -157,25 +194,67 @@ const validateForm = () => {
   const verifyCodeValid = validateVerifyCode()
   const passwordValid = validatePassword()
   const nicknameValid = validateNickname()
+  if (!captcha.key) {
+    errorMessage.value = '验证码加载失败，请点击图片刷新'
+    return false
+  }
   return phoneValid && verifyCodeValid && passwordValid && nicknameValid
 }
 
-const sendVerifyCode = async () => {
-  if (!validatePhone()) {
-    return
-  }
+const formatCaptchaImage = (image) => {
+  if (!image) return ''
+  return image.startsWith('data:') ? image : `data:image/png;base64,${image}`
+}
 
+const fetchCaptcha = async (silent = false, resetError = true) => {
+  if (captcha.loading) return
+  captcha.loading = true
   try {
-    codeCountdown.value = 60
-    const timer = setInterval(() => {
-      codeCountdown.value--
-      if (codeCountdown.value <= 0) {
-        clearInterval(timer)
-      }
-    }, 1000)
-    console.log('验证码已发送')
+    const res = await getCaptcha({
+      width: captchaSize.value.width,
+      height: captchaSize.value.height
+    })
+    const data = res.data || {}
+    captcha.key = data.captcha_key || ''
+    captcha.image = formatCaptchaImage(data.image_base64)
+    form.verify_code = ''
+    if (resetError) {
+      errors.verify_code = ''
+    }
   } catch (error) {
-    errorMessage.value = error.message || '发送验证码失败，请稍后重试'
+    console.error('Fetch captcha error:', error)
+    captcha.key = ''
+    captcha.image = ''
+    form.verify_code = ''
+    if (resetError) {
+      errors.verify_code = ''
+    }
+    if (!silent) {
+      errorMessage.value = error.message || '获取验证码失败，请稍后重试'
+    }
+  } finally {
+    captcha.loading = false
+  }
+}
+
+const refreshCaptcha = () => {
+  fetchCaptcha()
+}
+
+const handleVerifyCodeInput = (event) => {
+  const nextValue = event.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase()
+  form.verify_code = nextValue
+  clearError('verify_code')
+}
+
+const handleResize = () => {
+  const nextSize = getResponsiveCaptchaSize()
+  if (
+    nextSize.width !== captchaSize.value.width ||
+    nextSize.height !== captchaSize.value.height
+  ) {
+    captchaSize.value = nextSize
+    fetchCaptcha(true)
   }
 }
 
@@ -192,17 +271,40 @@ const handleRegister = async () => {
     await userStore.register({
       phone: form.phone,
       verify_code: form.verify_code,
+      captcha_key: captcha.key,
       password: form.password,
       nickname: form.nickname
     })
 
     router.push('/')
   } catch (error) {
-    errorMessage.value = error.message || '注册失败，请稍后重试'
+    const message = error?.message || '注册失败，请稍后重试'
+    if (message.includes('验证码')) {
+      errors.verify_code = message
+      form.verify_code = ''
+      await fetchCaptcha(true, false)
+      return
+    } else {
+      errorMessage.value = message
+      await fetchCaptcha(true)
+    }
   } finally {
     loading.value = false
   }
 }
+
+onMounted(() => {
+  fetchCaptcha()
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', handleResize)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', handleResize)
+  }
+})
 </script>
 
 <style scoped>
@@ -285,13 +387,63 @@ const handleRegister = async () => {
 
 .verify-row {
   display: flex;
+  flex-direction: column;
   gap: 12px;
+  align-items: stretch;
 }
 
-.verify-row button {
+.verify-row input {
+  width: 100%;
+}
+
+.captcha-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
   flex-shrink: 0;
-  padding: 0 16px;
-  height: 46px;
+  align-self: flex-start;
+  width: min(220px, 45vw);
+}
+
+.captcha-image {
+  border-radius: var(--radius-medium);
+  overflow: hidden;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.captcha-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid var(--color-border);
+  pointer-events: none;
+}
+
+.captcha-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.captcha-placeholder {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  padding: 0 14px;
+  text-align: center;
+}
+
+button.ghost.small {
+  height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
 }
 
 .error-message {
@@ -353,12 +505,12 @@ button:disabled {
     padding: 24px;
   }
 
-  .verify-row {
-    flex-direction: column;
+  .captcha-panel {
+    width: min(200px, 100%);
   }
 
-  .verify-row button {
-    width: 100%;
+  .captcha-image {
+    width: 100% !important;
   }
 }
 </style>

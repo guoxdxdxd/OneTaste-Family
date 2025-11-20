@@ -27,13 +27,14 @@ export function validatePassword(password, minLength = 6, maxLength = 20) {
 }
 
 /**
- * 验证验证码
+ * 验证图形验证码
  * @param {string} code 验证码
- * @param {number} length 验证码长度，默认6
+ * @param {number} length 验证码长度，默认4
  * @returns {boolean}
  */
-export function validateVerifyCode(code, length = 6) {
-  const codeReg = new RegExp(`^\\d{${length}}$`)
+export function validateVerifyCode(code, length = 4) {
+  if (!code) return false
+  const codeReg = new RegExp(`^[A-Za-z0-9]{${length}}$`)
   return codeReg.test(code)
 }
 
@@ -90,10 +91,10 @@ export function getPasswordError(password) {
  */
 export function getVerifyCodeError(code) {
   if (!code) {
-    return '请输入验证码'
+    return '请输入图形验证码'
   }
   if (!validateVerifyCode(code)) {
-    return '验证码格式不正确'
+    return '验证码格式不正确，请输入4位数字或字母'
   }
   return null
 }
@@ -115,4 +116,3 @@ export function getNicknameError(nickname) {
   }
   return null
 }
-

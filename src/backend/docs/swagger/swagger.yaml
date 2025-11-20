@@ -1,5 +1,21 @@
 basePath: /api/v1
 definitions:
+  models.CaptchaResponse:
+    description: 图形验证码返回数据
+    properties:
+      captcha_key:
+        description: 验证码编码
+        example: 01J0XYZABCD1234EFG567HIJK
+        type: string
+      expire_in:
+        description: 过期时间（秒）
+        example: 30
+        type: integer
+      image_base64:
+        description: 图形验证码Base64
+        example: data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...
+        type: string
+    type: object
   models.CookingStep:
     properties:
       content:
@@ -9,7 +25,7 @@ definitions:
       order:
         type: integer
       step_id:
-        type: integer
+        type: string
     type: object
   models.CookingStepInput:
     properties:
@@ -72,7 +88,7 @@ definitions:
   models.DishCreateResponse:
     properties:
       dish_id:
-        type: integer
+        type: string
       name:
         type: string
     type: object
@@ -85,7 +101,7 @@ definitions:
       description:
         type: string
       dish_id:
-        type: integer
+        type: string
       image_url:
         type: string
       ingredients:
@@ -121,7 +137,7 @@ definitions:
       created_at:
         type: string
       dish_id:
-        type: integer
+        type: string
       image_url:
         type: string
       name:
@@ -138,8 +154,8 @@ definitions:
         example: 15
         type: integer
       family_id:
-        example: 1
-        type: integer
+        example: 01HZX1YF8Y6S7K4V9Q2J3M5N6P
+        type: string
       max_dishes:
         example: 30
         type: integer
@@ -150,8 +166,8 @@ definitions:
         example: 张家的厨房
         type: string
       owner_id:
-        example: 1001
-        type: integer
+        example: 01HZX1YF8Y6S7K4V9Q2J3M5N6Q
+        type: string
     type: object
   models.FamilyInviteRequest:
     properties:
@@ -159,14 +175,14 @@ definitions:
         example: accept
         type: string
       family_id:
-        example: 1
-        type: integer
+        example: 01HZX1YF8Y6S7K4V9Q2J3M5N6P
+        type: string
       family_name:
         example: 张家的厨房
         type: string
       inviter_id:
-        example: 1001
-        type: integer
+        example: 01HZX1YF8Y6S7K4V9Q2J3M5N6Q
+        type: string
       inviter_nickname:
         example: 张三
         type: string
@@ -180,8 +196,8 @@ definitions:
   models.FamilyJoinResponse:
     properties:
       family_id:
-        example: 1
-        type: integer
+        example: 01HZX1YF8Y6S7K4V9Q2J3M5N6P
+        type: string
       joined_at:
         example: "2024-01-01T00:00:00Z"
         type: string
@@ -204,8 +220,8 @@ definitions:
         example: member
         type: string
       user_id:
-        example: 1002
-        type: integer
+        example: 01HZX1YF8Y6S7K4V9Q2J3M5N6R
+        type: string
     type: object
   models.FamilyResponse:
     properties:
@@ -213,8 +229,8 @@ definitions:
         example: 温馨的家庭
         type: string
       family_id:
-        example: 1
-        type: integer
+        example: 01HZX1YF8Y6S7K4V9Q2J3M5N6P
+        type: string
       max_dishes:
         example: 30
         type: integer
@@ -232,7 +248,7 @@ definitions:
       category:
         type: string
       ingredient_id:
-        type: integer
+        type: string
       name:
         type: string
       sort_order:
@@ -296,8 +312,25 @@ definitions:
         type: string
       user_id:
         description: 用户ID
-        example: 1
+        example: 01HZX1YF8Y6S7K4V9Q2J3M5N6P
+        type: string
+    type: object
+  models.MediaUploadResponse:
+    properties:
+      bucket:
+        type: string
+      content_type:
+        type: string
+      directory:
+        type: string
+      filename:
+        type: string
+      object_key:
+        type: string
+      size:
         type: integer
+      url:
+        type: string
     type: object
   models.MembershipInfo:
     description: 用户会员信息
@@ -314,6 +347,10 @@ definitions:
   models.RegisterRequest:
     description: 用户注册请求参数
     properties:
+      captcha_key:
+        description: 验证码编码
+        example: 01J0XYZABCD1234EFG567HIJK
+        type: string
       nickname:
         description: 昵称
         example: 张三
@@ -328,10 +365,11 @@ definitions:
         example: "13800138000"
         type: string
       verify_code:
-        description: 验证码，6位数字
-        example: "123456"
+        description: 图形验证码内容，不区分大小写
+        example: A9d3
         type: string
     required:
+    - captcha_key
     - nickname
     - password
     - phone
@@ -346,8 +384,8 @@ definitions:
         type: string
       user_id:
         description: 用户ID
-        example: 1
-        type: integer
+        example: 01HZX1YF8Y6S7K4V9Q2J3M5N6P
+        type: string
     type: object
   models.UpdateDishRequest:
     properties:
@@ -397,8 +435,8 @@ definitions:
         type: string
       user_id:
         description: 用户ID
-        example: 1
-        type: integer
+        example: 01HZX1YF8Y6S7K4V9Q2J3M5N6P
+        type: string
     type: object
   utils.FieldError:
     description: 字段验证错误信息
@@ -445,6 +483,37 @@ info:
   title: OneTaste Family API
   version: "1.0"
 paths:
+  /auth/captcha:
+    get:
+      description: 获取一个带干扰的图形验证码图片及对应的编码
+      parameters:
+      - description: 图片宽度（120-360），默认220
+        in: query
+        name: width
+        type: integer
+      - description: 图片高度（40-160），默认70
+        in: query
+        name: height
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 验证码获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CaptchaResponse'
+              type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: 获取图形验证码
+      tags:
+      - 用户认证
   /auth/login:
     post:
       consumes:
@@ -620,7 +689,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -658,7 +727,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -697,7 +766,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: 更新菜式请求
         in: body
         name: request
@@ -914,6 +983,51 @@ paths:
       summary: 健康检查
       tags:
       - 系统
+  /media/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传图片等媒体文件，并返回可访问地址。需要 Bearer Token。
+      parameters:
+      - description: 待上传文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: 文件目录前缀，例如 /user/head/{userId}、/family/{familyId}/dishes/{dishId}
+        in: formData
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.MediaUploadResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 上传媒体文件
+      tags:
+      - 媒体
   /user/info:
     get:
       consumes:
