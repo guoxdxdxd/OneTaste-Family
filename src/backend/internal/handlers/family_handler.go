@@ -181,17 +181,17 @@ func (h *FamilyHandler) GetFamilyMembers(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Success(members))
 }
 
-func getUserIDFromContext(c *gin.Context) (int64, bool) {
+func getUserIDFromContext(c *gin.Context) (string, bool) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, utils.Unauthorized("未授权"))
-		return 0, false
+		return "", false
 	}
 
-	id, ok := userID.(int64)
+	id, ok := userID.(string)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, utils.Unauthorized("无效的用户ID"))
-		return 0, false
+		return "", false
 	}
 
 	return id, true

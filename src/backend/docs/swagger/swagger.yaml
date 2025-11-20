@@ -1,5 +1,59 @@
 basePath: /api/v1
 definitions:
+  models.CookingStep:
+    properties:
+      content:
+        type: string
+      image_url:
+        type: string
+      order:
+        type: integer
+      step_id:
+        type: integer
+    type: object
+  models.CookingStepInput:
+    properties:
+      content:
+        maxLength: 2000
+        type: string
+      image_url:
+        maxLength: 500
+        type: string
+      order:
+        maximum: 200
+        minimum: 1
+        type: integer
+    required:
+    - content
+    - order
+    type: object
+  models.CreateDishRequest:
+    properties:
+      category:
+        maxLength: 50
+        type: string
+      description:
+        maxLength: 2000
+        type: string
+      image_url:
+        maxLength: 500
+        type: string
+      ingredients:
+        items:
+          $ref: '#/definitions/models.IngredientInput'
+        type: array
+      name:
+        maxLength: 100
+        type: string
+      steps:
+        items:
+          $ref: '#/definitions/models.CookingStepInput'
+        type: array
+    required:
+    - ingredients
+    - name
+    - steps
+    type: object
   models.CreateFamilyRequest:
     properties:
       description:
@@ -14,6 +68,66 @@ definitions:
         type: string
     required:
     - name
+    type: object
+  models.DishCreateResponse:
+    properties:
+      dish_id:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.DishDetailResponse:
+    properties:
+      category:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      dish_id:
+        type: integer
+      image_url:
+        type: string
+      ingredients:
+        items:
+          $ref: '#/definitions/models.Ingredient'
+        type: array
+      name:
+        type: string
+      steps:
+        items:
+          $ref: '#/definitions/models.CookingStep'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  models.DishListResponse:
+    properties:
+      dishes:
+        items:
+          $ref: '#/definitions/models.DishSummary'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+    type: object
+  models.DishSummary:
+    properties:
+      category:
+        type: string
+      created_at:
+        type: string
+      dish_id:
+        type: integer
+      image_url:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
     type: object
   models.FamilyInfoResponse:
     properties:
@@ -111,6 +225,49 @@ definitions:
         example: 张家的厨房
         type: string
     type: object
+  models.Ingredient:
+    properties:
+      amount:
+        type: number
+      category:
+        type: string
+      ingredient_id:
+        type: integer
+      name:
+        type: string
+      sort_order:
+        type: integer
+      storage_days:
+        type: integer
+      unit:
+        type: string
+    type: object
+  models.IngredientInput:
+    properties:
+      amount:
+        type: number
+      category:
+        maxLength: 50
+        type: string
+      name:
+        maxLength: 100
+        type: string
+      sort_order:
+        maximum: 1000
+        minimum: 0
+        type: integer
+      storage_days:
+        maximum: 365
+        minimum: 0
+        type: integer
+      unit:
+        maxLength: 20
+        type: string
+    required:
+    - amount
+    - name
+    - unit
+    type: object
   models.LoginRequest:
     description: 用户登录请求参数
     properties:
@@ -191,6 +348,33 @@ definitions:
         description: 用户ID
         example: 1
         type: integer
+    type: object
+  models.UpdateDishRequest:
+    properties:
+      category:
+        maxLength: 50
+        type: string
+      description:
+        maxLength: 2000
+        type: string
+      image_url:
+        maxLength: 500
+        type: string
+      ingredients:
+        items:
+          $ref: '#/definitions/models.IngredientInput'
+        type: array
+      name:
+        maxLength: 100
+        type: string
+      steps:
+        items:
+          $ref: '#/definitions/models.CookingStepInput'
+        type: array
+    required:
+    - ingredients
+    - name
+    - steps
     type: object
   models.UserInfoResponse:
     description: 用户信息返回数据
@@ -331,6 +515,232 @@ paths:
       summary: 用户注册
       tags:
       - 用户认证
+  /dishes:
+    get:
+      consumes:
+      - application/json
+      description: 按照家庭返回菜式列表，支持按分类和名称关键字筛选。需要Bearer Token认证。
+      parameters:
+      - description: 页码（默认1）
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认20，最大100）
+        in: query
+        name: page_size
+        type: integer
+      - description: 菜式分类
+        in: query
+        name: category
+        type: string
+      - description: 名称关键字
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DishListResponse'
+              type: object
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: 尚未加入家庭
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取菜式列表
+      tags:
+      - 菜式
+    post:
+      consumes:
+      - application/json
+      description: 向当前家庭食谱库添加菜式，至少包含一个食材和一个烹饪步骤。需要Bearer Token认证。
+      parameters:
+      - description: 创建菜式请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateDishRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DishCreateResponse'
+              type: object
+        "400":
+          description: 参数错误或业务限制
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: 尚未加入家庭
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 创建菜式
+      tags:
+      - 菜式
+  /dishes/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 仅允许菜式创建者或家庭管理员删除菜式。需要Bearer Token认证。
+      parameters:
+      - description: 菜式ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: 菜式或家庭不存在
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除菜式
+      tags:
+      - 菜式
+    get:
+      consumes:
+      - application/json
+      description: 返回菜式的食材和烹饪步骤信息。需要Bearer Token认证。
+      parameters:
+      - description: 菜式ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DishDetailResponse'
+              type: object
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: 菜式或家庭不存在
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取菜式详情
+      tags:
+      - 菜式
+    put:
+      consumes:
+      - application/json
+      description: 仅允许菜式创建者或家庭管理员编辑菜式。需要Bearer Token认证。
+      parameters:
+      - description: 菜式ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新菜式请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateDishRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DishDetailResponse'
+              type: object
+        "400":
+          description: 参数错误或业务限制
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: 菜式或家庭不存在
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新菜式
+      tags:
+      - 菜式
   /family/create:
     post:
       consumes:

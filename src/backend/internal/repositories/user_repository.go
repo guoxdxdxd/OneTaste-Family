@@ -31,19 +31,20 @@ func NewUserRepository() *UserRepository {
 // Create 创建用户
 func (r *UserRepository) Create(user *models.User) error {
 	query := `
-		INSERT INTO users (phone, password, nickname, avatar, status)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id, created_at, updated_at
+		INSERT INTO users (id, phone, password, nickname, avatar, status)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING created_at, updated_at
 	`
 
 	err := r.db.QueryRow(
 		query,
+		user.ID,
 		user.Phone,
 		user.Password,
 		user.Nickname,
 		user.Avatar,
 		user.Status,
-	).Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.CreatedAt, &user.UpdatedAt)
 
 	if err != nil {
 		// 检查是否是唯一约束冲突
@@ -87,7 +88,7 @@ func (r *UserRepository) GetByPhone(phone string) (*models.User, error) {
 }
 
 // GetByID 根据ID获取用户
-func (r *UserRepository) GetByID(id int64) (*models.User, error) {
+func (r *UserRepository) GetByID(id string) (*models.User, error) {
 	query := `
 		SELECT id, phone, password, nickname, avatar, status, created_at, updated_at
 		FROM users
@@ -128,4 +129,3 @@ func (r *UserRepository) ExistsByPhone(phone string) (bool, error) {
 
 	return exists, nil
 }
-

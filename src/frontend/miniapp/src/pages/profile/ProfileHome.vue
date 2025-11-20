@@ -211,25 +211,30 @@ const qrError = ref('')
 
 const showCreate = computed(() => !familyStore.hasFamily)
 
-const numericUserId = computed(() => {
+const normalizeId = (value) => {
+  if (value === undefined || value === null) return null
+  return String(value)
+}
+
+const currentUserId = computed(() => {
   if (userStore.userId == null) return null
-  const num = Number(userStore.userId)
-  return Number.isNaN(num) ? userStore.userId : num
+  return normalizeId(userStore.userId)
 })
 
 const membershipRole = computed(() => {
   if (!familyStore.hasFamily) return 'member'
-  const myId = numericUserId.value
-  const possibleOwnerIds = [
-    familyStore.familyInfo?.owner_id,
-    familyStore.familyInfo?.ownerId
-  ].filter((id) => id !== undefined && id !== null)
-  if (myId != null && possibleOwnerIds.some((id) => Number(id) === Number(myId))) {
+  const myId = currentUserId.value
+  const possibleOwnerIds = [familyStore.familyInfo?.owner_id, familyStore.familyInfo?.ownerId]
+    .map(normalizeId)
+    .filter(Boolean)
+  if (myId && possibleOwnerIds.some((id) => id === myId)) {
     return 'owner'
   }
   const me = familyStore.members.find((member) => {
     const ids = [member.user_id, member.userId, member.id]
-    return ids.some((id) => id != null && Number(id) === Number(myId))
+      .map(normalizeId)
+      .filter(Boolean)
+    return myId && ids.some((id) => id === myId)
   })
   return me?.role || familyStore.familyInfo?.member_role || familyStore.familyInfo?.role || 'member'
 })

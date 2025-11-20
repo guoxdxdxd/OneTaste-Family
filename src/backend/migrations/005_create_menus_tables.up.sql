@@ -1,10 +1,10 @@
 -- 创建菜单表
 CREATE TABLE menus (
-    id BIGSERIAL PRIMARY KEY,
-    family_id BIGINT NOT NULL,
+    id CHAR(26) PRIMARY KEY,
+    family_id CHAR(26) NOT NULL,
     date DATE NOT NULL,
     meal_type VARCHAR(20) NOT NULL,
-    created_by BIGINT NOT NULL,
+    created_by CHAR(26) NOT NULL,
     source VARCHAR(20) DEFAULT 'manual',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -26,9 +26,9 @@ CREATE TRIGGER update_menus_updated_at BEFORE UPDATE ON menus
 
 -- 创建菜单菜式关联表
 CREATE TABLE menu_dishes (
-    id BIGSERIAL PRIMARY KEY,
-    menu_id BIGINT NOT NULL,
-    dish_id BIGINT NOT NULL,
+    id CHAR(26) PRIMARY KEY,
+    menu_id CHAR(26) NOT NULL,
+    dish_id CHAR(26) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (menu_id, dish_id)
 );

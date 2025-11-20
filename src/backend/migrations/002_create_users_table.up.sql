@@ -1,6 +1,6 @@
 -- 创建用户表
 CREATE TABLE users (
-    id BIGSERIAL PRIMARY KEY,
+    id CHAR(26) PRIMARY KEY,
     phone VARCHAR(20) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     nickname VARCHAR(50),

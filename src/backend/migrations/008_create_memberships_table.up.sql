@@ -1,8 +1,8 @@
 -- 创建会员表
 CREATE TABLE memberships (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    family_id BIGINT NOT NULL,
+    id CHAR(26) PRIMARY KEY,
+    user_id CHAR(26) NOT NULL,
+    family_id CHAR(26) NOT NULL,
     plan_type VARCHAR(20) NOT NULL,
     status VARCHAR(20) DEFAULT 'active',
     started_at TIMESTAMP NOT NULL,

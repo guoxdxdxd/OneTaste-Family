@@ -35,7 +35,7 @@ func (r *FamilyRepository) BeginTx(ctx context.Context) (*sql.Tx, error) {
 }
 
 // IsUserInFamily 判断用户是否在家庭中
-func (r *FamilyRepository) IsUserInFamily(userID int64) (bool, error) {
+func (r *FamilyRepository) IsUserInFamily(userID string) (bool, error) {
 	query := `SELECT EXISTS(SELECT 1 FROM family_members WHERE user_id = $1 AND status = $2)`
 
 	var exists bool
@@ -47,7 +47,7 @@ func (r *FamilyRepository) IsUserInFamily(userID int64) (bool, error) {
 }
 
 // GetFamilyByUserID 根据用户ID查询家庭
-func (r *FamilyRepository) GetFamilyByUserID(userID int64) (*models.Family, error) {
+func (r *FamilyRepository) GetFamilyByUserID(userID string) (*models.Family, error) {
 	query := `
 		SELECT f.id, f.name, f.description, f.owner_id, f.max_dishes, f.status, f.created_at, f.updated_at
 		FROM families f
@@ -84,7 +84,7 @@ func (r *FamilyRepository) GetFamilyByUserID(userID int64) (*models.Family, erro
 }
 
 // GetFamilyByID 根据家庭ID获取家庭信息
-func (r *FamilyRepository) GetFamilyByID(familyID int64) (*models.Family, error) {
+func (r *FamilyRepository) GetFamilyByID(familyID string) (*models.Family, error) {
 	query := `
 		SELECT id, name, description, owner_id, max_dishes, status, created_at, updated_at
 		FROM families
@@ -113,7 +113,7 @@ func (r *FamilyRepository) GetFamilyByID(familyID int64) (*models.Family, error)
 }
 
 // IsUserInSpecificFamily 判断用户是否属于指定家庭
-func (r *FamilyRepository) IsUserInSpecificFamily(userID, familyID int64) (bool, error) {
+func (r *FamilyRepository) IsUserInSpecificFamily(userID, familyID string) (bool, error) {
 	query := `
 		SELECT EXISTS(
 			SELECT 1 FROM family_members
@@ -130,7 +130,7 @@ func (r *FamilyRepository) IsUserInSpecificFamily(userID, familyID int64) (bool,
 }
 
 // CountFamilyMembers 统计家庭成员数量
-func (r *FamilyRepository) CountFamilyMembers(familyID int64) (int, error) {
+func (r *FamilyRepository) CountFamilyMembers(familyID string) (int, error) {
 	query := `SELECT COUNT(*) FROM family_members WHERE family_id = $1 AND status = $2`
 
 	var count int
@@ -142,7 +142,7 @@ func (r *FamilyRepository) CountFamilyMembers(familyID int64) (int, error) {
 }
 
 // GetFamilyStats 获取家庭统计数据：成员数量、菜式数量
-func (r *FamilyRepository) GetFamilyStats(familyID int64) (memberCount int, dishCount int, err error) {
+func (r *FamilyRepository) GetFamilyStats(familyID string) (memberCount int, dishCount int, err error) {
 	memberQuery := `SELECT COUNT(*) FROM family_members WHERE family_id = $1 AND status = $2`
 	if err = r.db.QueryRow(memberQuery, familyID, models.FamilyMemberStatusActive).Scan(&memberCount); err != nil {
 		return 0, 0, fmt.Errorf("failed to count family members: %w", err)
@@ -159,55 +159,58 @@ func (r *FamilyRepository) GetFamilyStats(familyID int64) (memberCount int, dish
 // CreateFamilyTx 在事务内创建家庭
 func (r *FamilyRepository) CreateFamilyTx(ctx context.Context, tx *sql.Tx, family *models.Family) error {
 	query := `
-		INSERT INTO families (name, description, owner_id, max_dishes, status)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id, created_at, updated_at
+		INSERT INTO families (id, name, description, owner_id, max_dishes, status)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING created_at, updated_at
 	`
 
 	return tx.QueryRowContext(
 		ctx,
 		query,
+		family.ID,
 		family.Name,
 		family.Description,
 		family.OwnerID,
 		family.MaxDishes,
 		family.Status,
-	).Scan(&family.ID, &family.CreatedAt, &family.UpdatedAt)
+	).Scan(&family.CreatedAt, &family.UpdatedAt)
 }
 
 // AddFamilyMemberTx 在事务内添加成员
 func (r *FamilyRepository) AddFamilyMemberTx(ctx context.Context, tx *sql.Tx, member *models.FamilyMember) error {
 	query := `
-		INSERT INTO family_members (family_id, user_id, role, status)
-		VALUES ($1, $2, $3, $4)
-		RETURNING id, joined_at, created_at, updated_at
+		INSERT INTO family_members (id, family_id, user_id, role, status)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING joined_at, created_at, updated_at
 	`
 
 	return tx.QueryRowContext(
 		ctx,
 		query,
+		member.ID,
 		member.FamilyID,
 		member.UserID,
 		member.Role,
 		member.Status,
-	).Scan(&member.ID, &member.JoinedAt, &member.CreatedAt, &member.UpdatedAt)
+	).Scan(&member.JoinedAt, &member.CreatedAt, &member.UpdatedAt)
 }
 
 // AddFamilyMember 添加家庭成员（非事务）
 func (r *FamilyRepository) AddFamilyMember(member *models.FamilyMember) error {
 	query := `
-		INSERT INTO family_members (family_id, user_id, role, status)
-		VALUES ($1, $2, $3, $4)
-		RETURNING id, joined_at, created_at, updated_at
+		INSERT INTO family_members (id, family_id, user_id, role, status)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING joined_at, created_at, updated_at
 	`
 
 	err := r.db.QueryRow(
 		query,
+		member.ID,
 		member.FamilyID,
 		member.UserID,
 		member.Role,
 		member.Status,
-	).Scan(&member.ID, &member.JoinedAt, &member.CreatedAt, &member.UpdatedAt)
+	).Scan(&member.JoinedAt, &member.CreatedAt, &member.UpdatedAt)
 
 	if err != nil {
 		if err.Error() == "pq: duplicate key value violates unique constraint \"family_members_family_id_user_id_key\"" {
@@ -220,7 +223,7 @@ func (r *FamilyRepository) AddFamilyMember(member *models.FamilyMember) error {
 }
 
 // GetFamilyMembers 获取家庭成员列表
-func (r *FamilyRepository) GetFamilyMembers(familyID int64) ([]*models.FamilyMemberInfo, error) {
+func (r *FamilyRepository) GetFamilyMembers(familyID string) ([]*models.FamilyMemberInfo, error) {
 	query := `
 		SELECT fm.user_id, COALESCE(u.nickname, ''), COALESCE(u.avatar, ''), fm.role, fm.joined_at
 		FROM family_members fm

@@ -66,6 +66,7 @@ func (s *UserService) Register(req *models.RegisterRequest) (*models.RegisterRes
 
 	// 创建用户
 	user := &models.User{
+		ID:       utils.GenerateULID(),
 		Phone:    req.Phone,
 		Password: hashedPassword,
 		Nickname: req.Nickname,
@@ -126,7 +127,7 @@ func (s *UserService) Login(req *models.LoginRequest) (*models.LoginResponse, er
 }
 
 // GetUserInfo 获取用户信息
-func (s *UserService) GetUserInfo(userID int64) (*models.UserInfoResponse, error) {
+func (s *UserService) GetUserInfo(userID string) (*models.UserInfoResponse, error) {
 	user, err := s.userRepo.GetByID(userID)
 	if err != nil {
 		if err == repositories.ErrUserNotFound {

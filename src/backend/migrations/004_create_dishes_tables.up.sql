@@ -1,12 +1,12 @@
 -- 创建菜式表
 CREATE TABLE dishes (
-    id BIGSERIAL PRIMARY KEY,
-    family_id BIGINT NOT NULL,
+    id CHAR(26) PRIMARY KEY,
+    family_id CHAR(26) NOT NULL,
     name VARCHAR(100) NOT NULL,
     category VARCHAR(50),
     description TEXT,
     image_url VARCHAR(500),
-    created_by BIGINT NOT NULL,
+    created_by CHAR(26) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL
@@ -30,8 +30,8 @@ CREATE TRIGGER update_dishes_updated_at BEFORE UPDATE ON dishes
 
 -- 创建食材表
 CREATE TABLE ingredients (
-    id BIGSERIAL PRIMARY KEY,
-    dish_id BIGINT NOT NULL,
+    id CHAR(26) PRIMARY KEY,
+    dish_id CHAR(26) NOT NULL,
     name VARCHAR(100) NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     unit VARCHAR(20) NOT NULL,
@@ -55,8 +55,8 @@ CREATE INDEX IF NOT EXISTS idx_ingredients_category ON ingredients(category);
 
 -- 创建烹饪步骤表
 CREATE TABLE cooking_steps (
-    id BIGSERIAL PRIMARY KEY,
-    dish_id BIGINT NOT NULL,
+    id CHAR(26) PRIMARY KEY,
+    dish_id CHAR(26) NOT NULL,
     step_order INT NOT NULL,
     content TEXT NOT NULL,
     image_url VARCHAR(500),

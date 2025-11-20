@@ -1,9 +1,9 @@
 -- 创建家庭表
 CREATE TABLE families (
-    id BIGSERIAL PRIMARY KEY,
+    id CHAR(26) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT,
-    owner_id BIGINT NOT NULL,
+    owner_id CHAR(26) NOT NULL,
     max_dishes INT DEFAULT 30,
     status SMALLINT DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -25,9 +25,9 @@ CREATE TRIGGER update_families_updated_at BEFORE UPDATE ON families
 
 -- 创建家庭成员表
 CREATE TABLE family_members (
-    id BIGSERIAL PRIMARY KEY,
-    family_id BIGINT NOT NULL,
-    user_id BIGINT NOT NULL,
+    id CHAR(26) PRIMARY KEY,
+    family_id CHAR(26) NOT NULL,
+    user_id CHAR(26) NOT NULL,
     role VARCHAR(20) DEFAULT 'member',
     status SMALLINT DEFAULT 1,
     joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

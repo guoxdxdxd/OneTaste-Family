@@ -1,8 +1,8 @@
 -- 创建AI调用记录表
 CREATE TABLE ai_usage_logs (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    family_id BIGINT NOT NULL,
+    id CHAR(26) PRIMARY KEY,
+    user_id CHAR(26) NOT NULL,
+    family_id CHAR(26) NOT NULL,
     feature_type VARCHAR(50) NOT NULL,
     period_type VARCHAR(20) NOT NULL,
     period_date DATE NOT NULL,

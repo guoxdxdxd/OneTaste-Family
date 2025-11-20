@@ -15,12 +15,12 @@ var (
 
 // Claims JWT Claims
 type Claims struct {
-	UserID int64 `json:"user_id"`
+	UserID string `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
 // GenerateToken 生成JWT Token
-func GenerateToken(userID int64) (string, error) {
+func GenerateToken(userID string) (string, error) {
 	expirationTime := time.Now().Add(config.AppConfig.JWT.Expiration)
 	
 	claims := &Claims{
@@ -64,4 +64,3 @@ func ParseToken(tokenString string) (*Claims, error) {
 func GetTokenExpiration() int64 {
 	return int64(config.AppConfig.JWT.Expiration.Seconds())
 }
-

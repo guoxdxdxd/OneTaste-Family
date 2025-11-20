@@ -91,9 +91,9 @@ const handleAccept = async () => {
   success.value = false
   try {
     await familyStore.acceptInvite({
-      family_id: Number(inviteParams.value.family_id),
+      family_id: inviteParams.value.family_id,
       family_name: inviteParams.value.family_name,
-      inviter_id: Number(inviteParams.value.inviter_id),
+      inviter_id: inviteParams.value.inviter_id,
       inviter_nickname: inviteParams.value.inviter_nickname
     })
     success.value = true

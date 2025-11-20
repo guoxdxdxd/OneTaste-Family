@@ -9,6 +9,7 @@ import (
 
 	"onetaste-family/backend/internal/models"
 	"onetaste-family/backend/internal/repositories"
+	"onetaste-family/backend/internal/utils"
 )
 
 var (
@@ -50,7 +51,7 @@ func NewFamilyService() *FamilyService {
 }
 
 // CreateFamily 创建家庭
-func (s *FamilyService) CreateFamily(req *models.CreateFamilyRequest, userID int64) (*models.FamilyResponse, error) {
+func (s *FamilyService) CreateFamily(req *models.CreateFamilyRequest, userID string) (*models.FamilyResponse, error) {
 	name := strings.TrimSpace(req.Name)
 	if name == "" || utf8.RuneCountInString(name) > familyNameMaxLength {
 		return nil, ErrInvalidFamilyName
@@ -71,6 +72,7 @@ func (s *FamilyService) CreateFamily(req *models.CreateFamilyRequest, userID int
 	}
 
 	family := &models.Family{
+		ID:          utils.GenerateULID(),
 		Name:        name,
 		Description: description,
 		OwnerID:     userID,
@@ -95,6 +97,7 @@ func (s *FamilyService) CreateFamily(req *models.CreateFamilyRequest, userID int
 	}
 
 	member := &models.FamilyMember{
+		ID:       utils.GenerateULID(),
 		FamilyID: family.ID,
 		UserID:   userID,
 		Role:     models.FamilyRoleOwner,
@@ -119,7 +122,7 @@ func (s *FamilyService) CreateFamily(req *models.CreateFamilyRequest, userID int
 }
 
 // GetFamilyInfo 获取当前用户所属家庭信息
-func (s *FamilyService) GetFamilyInfo(userID int64) (*models.FamilyInfoResponse, error) {
+func (s *FamilyService) GetFamilyInfo(userID string) (*models.FamilyInfoResponse, error) {
 	family, err := s.familyRepo.GetFamilyByUserID(userID)
 	if err != nil {
 		if errors.Is(err, repositories.ErrFamilyNotFound) {
@@ -145,7 +148,7 @@ func (s *FamilyService) GetFamilyInfo(userID int64) (*models.FamilyInfoResponse,
 }
 
 // JoinFamilyViaInvite 扫码加入家庭
-func (s *FamilyService) JoinFamilyViaInvite(req *models.FamilyInviteRequest, userID int64) (*models.FamilyJoinResponse, error) {
+func (s *FamilyService) JoinFamilyViaInvite(req *models.FamilyInviteRequest, userID string) (*models.FamilyJoinResponse, error) {
 	if strings.ToLower(req.Action) != "accept" {
 		return nil, ErrInvalidInviteAction
 	}
@@ -187,6 +190,7 @@ func (s *FamilyService) JoinFamilyViaInvite(req *models.FamilyInviteRequest, use
 	}
 
 	member := &models.FamilyMember{
+		ID:       utils.GenerateULID(),
 		FamilyID: req.FamilyID,
 		UserID:   userID,
 		Role:     models.FamilyRoleMember,
@@ -208,7 +212,7 @@ func (s *FamilyService) JoinFamilyViaInvite(req *models.FamilyInviteRequest, use
 }
 
 // GetFamilyMembers 获取家庭成员列表
-func (s *FamilyService) GetFamilyMembers(userID int64) ([]*models.FamilyMemberInfo, error) {
+func (s *FamilyService) GetFamilyMembers(userID string) ([]*models.FamilyMemberInfo, error) {
 	family, err := s.familyRepo.GetFamilyByUserID(userID)
 	if err != nil {
 		if errors.Is(err, repositories.ErrFamilyNotFound) {

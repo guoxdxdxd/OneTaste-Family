@@ -31,6 +31,7 @@ src/backend/
 │   │   ├── README.md                  # Handler 层开发约定
 │   │   ├── auth_handler.go            # 认证相关接口（登录、注册等）
 │   │   ├── family_handler.go          # 家庭数据的 HTTP 接口
+│   │   ├── dish_handler.go            # 家庭食谱（菜式）接口
 │   │   ├── router.go                  # 路由初始化及依赖注入
 │   │   ├── routes.go                  # 路由表与分组定义
 │   │   └── user_handler.go            # 用户信息相关接口
@@ -38,12 +39,15 @@ src/backend/
 │   │   └── auth.go                    # JWT 鉴权中间件
 │   ├── models/                        # 数据模型定义
 │   │   ├── family.go                  # 家庭实体及数据库映射
+│   │   ├── dish.go                    # 菜式/食材/步骤请求与响应模型
 │   │   └── user.go                    # 用户实体及数据库映射
 │   ├── repositories/                  # 数据访问层
 │   │   ├── family_repository.go       # 家庭表 CRUD 封装
+│   │   ├── dish_repository.go         # 菜式、食材、烹饪步骤的 CRUD
 │   │   └── user_repository.go         # 用户表 CRUD 封装
 │   ├── services/                      # 业务逻辑层
 │   │   ├── family_service.go          # 家庭相关业务逻辑
+│   │   ├── dish_service.go            # 食谱管理（菜式）业务逻辑
 │   │   └── user_service.go            # 用户相关业务逻辑
 │   └── utils/                         # 通用工具集合
 │       ├── BINDING_USAGE.md           # binding 工具的使用说明
@@ -111,11 +115,11 @@ Swag 命令生成的描述文件，提供 API 文档产物：
 ### internal/
 Go 模块的核心业务逻辑所在，也是项目最多文件的目录：
 - `config/`：`config.go` 与 `loader.go` 负责定义配置结构并注入默认值。
-- `handlers/`：REST 接口层，定义 gin 路由及请求处理；`router.go` 构建服务器，`routes.go` 列出所有路径，`auth_handler.go`/`user_handler.go`/`family_handler.go` 等承担具体模块逻辑。
+- `handlers/`：REST 接口层，定义 gin 路由及请求处理；`router.go` 构建服务器，`routes.go` 列出所有路径，`auth_handler.go`/`user_handler.go`/`family_handler.go`/`dish_handler.go` 等承担具体模块逻辑。
 - `middleware/`：目前仅有 `auth.go` JWT 鉴权中间件，在 `router.go` 中注册。
-- `models/`：使用 struct 定义数据库表字段以及 JSON 标签。
-- `repositories/`：封装数据库访问，便于在 service 层通过接口调用。
-- `services/`：承载业务逻辑与事务控制，按实体拆分为 user/family。
+- `models/`：使用 struct 定义数据库表字段以及 JSON 标签，覆盖用户、家庭及菜式相关结构。
+- `repositories/`：封装数据库访问，便于在 service 层通过接口调用，包含 user/family/dish 等仓储。
+- `services/`：承载业务逻辑与事务控制，按实体拆分为 user/family/dish。
 - `utils/`：自定义工具，包括参数绑定、JWT、密码、响应包装和验证。`BINDING_USAGE.md` 解释 binding 设计思路。
 
 ### migrations/

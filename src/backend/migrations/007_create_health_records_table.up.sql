@@ -1,8 +1,8 @@
 -- 创建身体状况记录表
 CREATE TABLE health_records (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    family_id BIGINT NOT NULL,
+    id CHAR(26) PRIMARY KEY,
+    user_id CHAR(26) NOT NULL,
+    family_id CHAR(26) NOT NULL,
     diseases TEXT,
     work_status VARCHAR(50),
     stress_level VARCHAR(20),

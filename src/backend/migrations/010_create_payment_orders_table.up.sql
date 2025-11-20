@@ -1,9 +1,9 @@
 -- 创建支付订单表
 CREATE TABLE payment_orders (
-    id BIGSERIAL PRIMARY KEY,
+    id CHAR(26) PRIMARY KEY,
     order_no VARCHAR(50) UNIQUE NOT NULL,
-    user_id BIGINT NOT NULL,
-    family_id BIGINT NOT NULL,
+    user_id CHAR(26) NOT NULL,
+    family_id CHAR(26) NOT NULL,
     plan_type VARCHAR(20) NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     payment_method VARCHAR(20),

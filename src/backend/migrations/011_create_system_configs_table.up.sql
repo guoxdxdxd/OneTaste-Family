@@ -1,6 +1,6 @@
 -- 创建系统配置表
 CREATE TABLE system_configs (
-    id BIGSERIAL PRIMARY KEY,
+    id CHAR(26) PRIMARY KEY,
     config_key VARCHAR(100) UNIQUE NOT NULL,
     config_value TEXT,
     description VARCHAR(500),

@@ -45,3 +45,18 @@ func RegisterFamilyRoutes(api *gin.RouterGroup) {
 		family.GET("/members", familyHandler.GetFamilyMembers)
 	}
 }
+
+// RegisterDishRoutes 注册菜式相关路由
+func RegisterDishRoutes(api *gin.RouterGroup) {
+	dishHandler := NewDishHandler()
+
+	dishes := api.Group("/dishes")
+	dishes.Use(middleware.AuthMiddleware())
+	{
+		dishes.POST("", dishHandler.CreateDish)
+		dishes.GET("", dishHandler.GetDishList)
+		dishes.GET("/:id", dishHandler.GetDishDetail)
+		dishes.PUT("/:id", dishHandler.UpdateDish)
+		dishes.DELETE("/:id", dishHandler.DeleteDish)
+	}
+}

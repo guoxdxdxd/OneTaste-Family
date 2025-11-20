@@ -41,7 +41,7 @@ func (h *UserHandler) GetUserInfo(c *gin.Context) {
 	}
 
 	// 类型断言
-	id, ok := userID.(int64)
+	id, ok := userID.(string)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, utils.Unauthorized("无效的用户ID"))
 		return

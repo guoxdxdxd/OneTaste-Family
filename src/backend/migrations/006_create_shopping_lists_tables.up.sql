@@ -1,12 +1,12 @@
 -- 创建购物清单表
 CREATE TABLE shopping_lists (
-    id BIGSERIAL PRIMARY KEY,
-    family_id BIGINT NOT NULL,
+    id CHAR(26) PRIMARY KEY,
+    family_id CHAR(26) NOT NULL,
     name VARCHAR(100),
     start_date DATE,
     end_date DATE,
     status VARCHAR(20) DEFAULT 'pending',
-    created_by BIGINT NOT NULL,
+    created_by CHAR(26) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -27,8 +27,8 @@ CREATE TRIGGER update_shopping_lists_updated_at BEFORE UPDATE ON shopping_lists
 
 -- 创建购物清单项表
 CREATE TABLE shopping_list_items (
-    id BIGSERIAL PRIMARY KEY,
-    list_id BIGINT NOT NULL,
+    id CHAR(26) PRIMARY KEY,
+    list_id CHAR(26) NOT NULL,
     ingredient_name VARCHAR(100) NOT NULL,
     total_amount DECIMAL(10,2) NOT NULL,
     unit VARCHAR(20) NOT NULL,
