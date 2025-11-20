@@ -11,8 +11,10 @@ echo "Initializing Docker environment..."
 echo "Creating data directories..."
 mkdir -p ../data/postgres
 mkdir -p ../data/redis
+mkdir -p ../data/minio
 mkdir -p ../backups/postgres
 mkdir -p ../backups/redis
+mkdir -p ../backups/minio
 
 # 设置目录权限和所有者
 echo "Setting directory permissions and ownership..."
@@ -90,6 +92,27 @@ chmod 755 ../data/redis
 
 chmod 755 ../backups/postgres
 chmod 755 ../backups/redis
+chmod 755 ../backups/minio
+
+# MinIO 数据目录权限（容器内默认使用 UID 1000）
+echo "Configuring MinIO data directory permissions..."
+MINIO_OWNER_SET=false
+if id 1000 >/dev/null 2>&1; then
+    if chown 1000:1000 ../data/minio 2>/dev/null; then
+        MINIO_OWNER_SET=true
+    elif sudo chown 1000:1000 ../data/minio 2>/dev/null; then
+        MINIO_OWNER_SET=true
+    fi
+elif sudo chown 1000:1000 ../data/minio 2>/dev/null; then
+    MINIO_OWNER_SET=true
+fi
+
+if [ "$MINIO_OWNER_SET" = true ]; then
+    chmod 750 ../data/minio
+else
+    echo "   ⚠ 无法设置 MinIO 目录所有者，使用 770 权限（请仅限内网环境使用）"
+    chmod 770 ../data/minio
+fi
 
 # 创建 .env 文件（如果不存在）
 if [ ! -f .env ]; then
@@ -109,4 +132,3 @@ echo "Next steps:"
 echo "1. Edit .env file and set secure passwords"
 echo "2. Run: docker compose up -d"
 echo "3. Check status: docker compose ps"
-

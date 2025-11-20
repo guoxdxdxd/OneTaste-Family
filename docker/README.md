@@ -40,6 +40,10 @@ docker-compose exec postgres psql -U postgres -d onetaste_family -c "SELECT vers
 
 # 测试 Redis 连接
 docker-compose exec redis redis-cli -a YourRedisPassword ping
+
+# 检查 MinIO 状态
+curl -f http://localhost:9000/minio/health/live
+# 或打开 http://localhost:9090 使用 MINIO_ROOT_USER/MINIO_ROOT_PASSWORD 登录控制台
 ```
 
 ## 常用命令
@@ -60,12 +64,25 @@ docker compose logs -f [service_name]
 # 进入容器
 docker compose exec postgres bash
 docker compose exec redis sh
+docker compose exec minio sh
+
+# 查看单个服务日志
+docker compose logs -f postgres
+docker compose logs -f redis
+docker compose logs -f minio
 
 # 备份 PostgreSQL
 ./backup_postgres.sh
 
 # 备份 Redis
 ./backup_redis.sh
+
+# 使用 mc 临时容器查看 MinIO 桶
+MINIO_ROOT_USER=$(grep MINIO_ROOT_USER .env | cut -d '=' -f2)
+MINIO_ROOT_PASSWORD=$(grep MINIO_ROOT_PASSWORD .env | cut -d '=' -f2)
+docker run --rm --network host \
+  -e MC_HOST_local="http://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@localhost:9000" \
+  minio/mc ls local
 ```
 
 ## 故障排查
@@ -112,6 +129,12 @@ docker compose up -d postgres
    docker compose up -d postgres
    ```
 
+4. **MinIO 控制台无法访问**
+   ```bash
+   docker compose logs minio
+   curl http://localhost:9000/minio/health/live
+   ```
+
 ## 文件说明
 
 - `docker-compose.yml` - Docker Compose 配置文件
@@ -122,13 +145,16 @@ docker compose up -d postgres
 - `backup_postgres.sh` - PostgreSQL 备份脚本
 - `backup_redis.sh` - Redis 备份脚本
 - `init.sh` - 初始化脚本
+- `redis/healthcheck.sh` - Redis 健康检查脚本（被容器挂载使用）
 
 ## 数据目录
 
 - `../data/postgres/` - PostgreSQL 数据目录
 - `../data/redis/` - Redis 数据目录
+- `../data/minio/` - MinIO 数据目录
 - `../backups/postgres/` - PostgreSQL 备份目录
 - `../backups/redis/` - Redis 备份目录
+- `../backups/minio/` - MinIO 备份目录（手动创建，用于 mc 同步备份）
 
 ## 连接信息
 
@@ -144,6 +170,12 @@ docker compose up -d postgres
 - 端口: `6379`
 - 密码: `.env` 文件中的 `REDIS_PASSWORD`
 
+### MinIO
+- API: `http://localhost:9000` (容器内: `http://minio:9000`)
+- Console: `http://localhost:9090`
+- 访问凭据: `.env` 文件中的 `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD`
+- MC 示例地址: `MC_HOST_local="http://USER:PASSWORD@localhost:9000"`
+
 ## 安全提示
 
 1. **必须修改默认密码**：生产环境使用强密码
@@ -154,4 +186,3 @@ docker compose up -d postgres
 ## 详细文档
 
 查看 [DOCKER_DEPLOYMENT.md](../docs/DOCKER_DEPLOYMENT.md) 获取完整的部署文档。
-

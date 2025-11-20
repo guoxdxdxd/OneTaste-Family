@@ -2,7 +2,7 @@
 
 ## 概述
 
-本文档介绍如何使用 Docker 容器部署 OneTaste Family 项目的数据库服务（PostgreSQL 和 Redis）。
+本文档介绍如何使用 Docker 容器部署 OneTaste Family 项目的数据库服务（PostgreSQL、Redis）以及对象存储服务（MinIO）。
 
 ## 系统要求
 
@@ -113,6 +113,8 @@ sudo systemctl start docker
 # 允许 Docker 网络
 sudo ufw allow 5432/tcp  # PostgreSQL
 sudo ufw allow 6379/tcp  # Redis
+sudo ufw allow 9000/tcp  # MinIO API
+sudo ufw allow 9090/tcp  # MinIO Console
 
 # 或者允许 Docker 自动管理防火墙规则
 sudo ufw allow from 172.16.0.0/12
@@ -184,7 +186,8 @@ OneTasteFamily/
 │       └── redis.conf               # Redis 配置文件（可选）
 ├── data/
 │   ├── postgres/                    # PostgreSQL 数据目录（自动创建）
-│   └── redis/                       # Redis 数据目录（自动创建）
+│   ├── redis/                       # Redis 数据目录（自动创建）
+│   └── minio/                       # MinIO 数据目录（自动创建）
 └── docs/
     └── DOCKER_DEPLOYMENT.md         # 本文档
 ```
@@ -254,7 +257,10 @@ services:
     image: redis:latest
     container_name: onetaste_redis
     restart: unless-stopped
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-ChangeMe123!}
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-ChangeMe123!}
+    command: >
+      sh -c "redis-server --appendonly yes --requirepass $${REDIS_PASSWORD}"
     ports:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
@@ -262,16 +268,45 @@ services:
       - ../data/redis:/data
       # 可选：挂载 Redis 配置文件
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      # 健康检查脚本
+      - ./redis/healthcheck.sh:/usr/local/bin/healthcheck.sh:ro
     networks:
       - onetaste_network
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: ["CMD", "sh", "/usr/local/bin/healthcheck.sh"]
       interval: 10s
       timeout: 3s
       retries: 5
     depends_on:
       postgres:
         condition: service_healthy
+
+  # MinIO 对象存储服务
+  minio:
+    image: minio/minio:latest
+    container_name: onetaste_minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-ChangeMe123!}
+      MINIO_SERVER_URL: ${MINIO_SERVER_URL:-http://localhost:${MINIO_API_PORT:-9000}}
+    command: server /data --console-address ":${MINIO_CONSOLE_PORT:-9090}"
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9090}:9090"
+    volumes:
+      - ../data/minio:/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fs http://localhost:9000/minio/health/live || exit 1"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - onetaste_network
 
 networks:
   onetaste_network:
@@ -291,6 +326,14 @@ POSTGRES_PORT=5432
 # Redis 配置
 REDIS_PASSWORD=YourSecurePassword123!
 REDIS_PORT=6379
+
+# MinIO 配置
+MINIO_ROOT_USER=minioadmin
+MINIO_ROOT_PASSWORD=YourSecurePassword123!
+MINIO_API_PORT=9000
+MINIO_CONSOLE_PORT=9090
+# 如果需要从外部访问，请将 localhost 替换为实际域名/IP
+MINIO_SERVER_URL=http://localhost:9000
 ```
 
 **安全提示**：
@@ -313,12 +356,14 @@ cd OneTasteFamily
 # 在项目根目录执行
 mkdir -p data/postgres
 mkdir -p data/redis
+mkdir -p data/minio
 mkdir -p backups/postgres
 mkdir -p backups/redis
 
 # 设置目录权限（PostgreSQL 需要特定权限）
 chmod 700 data/postgres
 chmod 755 data/redis
+chmod 750 data/minio
 chmod 755 backups/postgres
 chmod 755 backups/redis
 ```
@@ -341,6 +386,9 @@ nano .env
 openssl rand -base64 32
 
 # 生成 Redis 密码
+openssl rand -base64 32
+
+# 生成 MinIO Root 密码
 openssl rand -base64 32
 ```
 
@@ -367,6 +415,9 @@ docker compose exec postgres pg_isready -U postgres
 
 # 检查 Redis 健康状态（从 .env 文件读取密码）
 docker compose exec redis redis-cli -a $(grep REDIS_PASSWORD .env | cut -d '=' -f2) ping
+
+# 检查 MinIO 健康状态
+curl -f http://localhost:9000/minio/health/live
 ```
 
 ### 6. 测试连接
@@ -404,6 +455,28 @@ EXIT  # 退出
 docker compose exec redis redis-cli -a $(grep REDIS_PASSWORD .env | cut -d '=' -f2)
 ```
 
+#### MinIO 连接测试
+
+- **浏览器访问**：在宿主机打开 `http://localhost:9090`（或 `.env` 中配置的控制台端口），使用 `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` 登录并创建桶（Bucket）。
+- **使用 MinIO Client（mc）**：如果未安装 `mc`，可以用临时容器执行：
+
+```bash
+MINIO_ROOT_USER=$(grep MINIO_ROOT_USER .env | cut -d '=' -f2)
+MINIO_ROOT_PASSWORD=$(grep MINIO_ROOT_PASSWORD .env | cut -d '=' -f2)
+
+# 查看已有桶
+docker run --rm --network host \
+  -e MC_HOST_local="http://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@localhost:9000" \
+  minio/mc ls local
+
+# 创建业务桶（示例）
+docker run --rm --network host \
+  -e MC_HOST_local="http://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@localhost:9000" \
+  minio/mc mb local/onetaste-media
+```
+
+> 如果宿主机不支持 `--network host`（例如 macOS），请直接安装 `mc` 或在与 MinIO 同网络的 Linux 服务器上执行上述命令。
+
 ## 数据目录说明
 
 ### PostgreSQL 数据目录
@@ -423,6 +496,15 @@ docker compose exec redis redis-cli -a $(grep REDIS_PASSWORD .env | cut -d '=' -
 - **包含内容**：
   - AOF 文件（appendonly.aof）
   - RDB 快照文件（dump.rdb，如果启用）
+
+### MinIO 数据目录
+
+- **挂载路径**：`../data/minio:/data`
+- **数据位置**：`data/minio/`
+- **包含内容**：
+  - 用户上传的对象文件
+  - MinIO 元数据与版本信息
+  - Bucket 配置与策略
 
 ## 常用操作
 
@@ -466,6 +548,9 @@ docker compose logs -f postgres
 # 查看 Redis 日志
 docker compose logs -f redis
 
+# 查看 MinIO 日志
+docker compose logs -f minio
+
 # 查看最近 100 行日志
 docker compose logs --tail=100 -f
 ```
@@ -479,6 +564,7 @@ docker compose restart
 # 重启特定服务
 docker compose restart postgres
 docker compose restart redis
+docker compose restart minio
 ```
 
 ### 进入容器
@@ -489,6 +575,9 @@ docker compose exec postgres bash
 
 # 进入 Redis 容器
 docker compose exec redis sh
+
+# 进入 MinIO 容器
+docker compose exec minio sh
 ```
 
 ## 数据备份
@@ -595,6 +684,38 @@ cd docker
 docker compose start redis
 ```
 
+### MinIO 备份
+
+#### 1. 使用 mc 同步桶数据
+
+```bash
+MINIO_ROOT_USER=$(grep MINIO_ROOT_USER .env | cut -d '=' -f2)
+MINIO_ROOT_PASSWORD=$(grep MINIO_ROOT_PASSWORD .env | cut -d '=' -f2)
+mkdir -p ../backups/minio
+
+docker run --rm --network host \
+  -v $(pwd)/../backups/minio:/backup \
+  -e MC_HOST_local="http://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@localhost:9000" \
+  minio/mc mirror local /backup
+```
+
+上面的命令会将所有桶的数据同步到 `backups/minio` 目录，可结合定时任务定期执行。
+
+#### 2. 备份数据目录
+
+```bash
+# 停止 MinIO 容器
+docker compose stop minio
+
+# 备份数据目录（在项目根目录执行）
+cd ..
+tar -czf minio_backup_$(date +%Y%m%d_%H%M%S).tar.gz data/minio/
+
+# 启动 MinIO 容器
+cd docker
+docker compose start minio
+```
+
 ## 数据恢复
 
 ### PostgreSQL 恢复
@@ -662,6 +783,38 @@ cp redis_backup.aof data/redis/appendonly.aof
 # 启动 Redis
 cd docker
 docker compose start redis
+```
+
+### MinIO 恢复
+
+#### 1. 使用 mc 同步数据
+
+```bash
+MINIO_ROOT_USER=$(grep MINIO_ROOT_USER .env | cut -d '=' -f2)
+MINIO_ROOT_PASSWORD=$(grep MINIO_ROOT_PASSWORD .env | cut -d '=' -f2)
+
+docker run --rm --network host \
+  -v $(pwd)/../backups/minio:/backup \
+  -e MC_HOST_local="http://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@localhost:9000" \
+  minio/mc mirror /backup local
+```
+
+该命令会将 `backups/minio` 中的离线备份重新同步回 MinIO。
+
+#### 2. 恢复数据目录
+
+```bash
+# 停止 MinIO
+docker compose stop minio
+
+# 恢复数据目录（在项目根目录执行）
+cd ..
+rm -rf data/minio/*
+tar -xzf minio_backup_20240115_020000.tar.gz
+
+# 启动 MinIO
+cd docker
+docker compose start minio
 ```
 
 ## 性能优化
@@ -1032,4 +1185,3 @@ alias redis-cli-docker='docker compose exec redis redis-cli -a $(grep REDIS_PASS
 - [数据库设计文档](./DATABASE.md)
 - [部署文档](./DEPLOYMENT.md)
 - [API 文档](./API.md)
-
