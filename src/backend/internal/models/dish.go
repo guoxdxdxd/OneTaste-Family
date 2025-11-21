@@ -4,7 +4,7 @@ import "time"
 
 // IngredientInput 菜式食材入参
 type IngredientInput struct {
-	IngredientID string  `json:"ingredient_id" binding:"required,len=26"`
+	IngredientID string  `json:"ingredient_id" binding:"required,min=1,max=26"`
 	Amount       float64 `json:"amount" binding:"required,gt=0"`
 	Unit         string  `json:"unit" binding:"required,max=20"`
 	Notes        string  `json:"notes" binding:"omitempty,max=255"`

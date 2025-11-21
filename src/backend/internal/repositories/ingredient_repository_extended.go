@@ -39,6 +39,7 @@ func (r *IngredientRepository) SearchActiveIngredients(keyword string, limit int
 			return nil, fmt.Errorf("failed to scan ingredient: %w", err)
 		}
 
+		item.IngredientID = strings.TrimSpace(item.IngredientID)
 		item.Category = nullableString(category)
 		item.DefaultUnit = nullableString(unit)
 		if storage.Valid {
@@ -104,6 +105,7 @@ func (r *IngredientRepository) GetActiveByCategory(category, keyword string, pag
 			return nil, 0, fmt.Errorf("failed to scan ingredient: %w", err)
 		}
 
+		item.IngredientID = strings.TrimSpace(item.IngredientID)
 		item.Category = nullableString(category)
 		item.DefaultUnit = nullableString(unit)
 		if storage.Valid {

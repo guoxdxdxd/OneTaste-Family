@@ -265,6 +265,7 @@ func (r *DishRepository) GetIngredients(dishID string) ([]*models.Ingredient, er
 			return nil, fmt.Errorf("failed to scan ingredient: %w", err)
 		}
 
+		ingredient.IngredientID = strings.TrimSpace(ingredient.IngredientID)
 		ingredient.IngredientNameEn = nullableString(nameEn)
 		ingredient.Category = nullableString(category)
 		ingredient.DefaultUnit = nullableString(defaultUnit)

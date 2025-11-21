@@ -25,6 +25,7 @@ Thumbs.db
 # 临时文件
 *.tmp
 *.temp
+src/backend/.gocache/*
 
 # 编译文件
 *.exe

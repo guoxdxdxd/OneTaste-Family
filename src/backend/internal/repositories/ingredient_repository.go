@@ -3,6 +3,7 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/lib/pq"
 	"onetaste-family/backend/internal/models"
@@ -59,6 +60,7 @@ func (r *IngredientRepository) GetActiveByIDs(ids []string) (map[string]*models.
 			return nil, fmt.Errorf("failed to scan ingredient: %w", err)
 		}
 
+		item.ID = strings.TrimSpace(item.ID)
 		item.NameEN = nullableString(nameEn)
 		item.Category = nullableString(category)
 		item.DefaultUnit = nullableString(unit)
