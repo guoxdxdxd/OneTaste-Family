@@ -151,7 +151,7 @@ func (r *DishRepository) UpdateDishWithDetails(dish *models.Dish, ingredients []
 		return fmt.Errorf("failed to update dish: %w", err)
 	}
 
-	if _, err = tx.ExecContext(ctx, `DELETE FROM ingredients WHERE dish_id = $1`, dish.ID); err != nil {
+	if _, err = tx.ExecContext(ctx, `DELETE FROM dish_ingredients WHERE dish_id = $1`, dish.ID); err != nil {
 		return fmt.Errorf("failed to delete old ingredients: %w", err)
 	}
 
@@ -215,10 +215,23 @@ func (r *DishRepository) GetDishByID(dishID, familyID string) (*models.Dish, err
 // GetIngredients 获取菜式食材列表
 func (r *DishRepository) GetIngredients(dishID string) ([]*models.Ingredient, error) {
 	query := `
-		SELECT id, dish_id, name, amount, unit, category, storage_days, sort_order
-		FROM ingredients
-		WHERE dish_id = $1
-		ORDER BY sort_order ASC, id ASC
+		SELECT
+			di.id,
+			di.dish_id,
+			di.ingredient_id,
+			bi.name,
+			bi.name_en,
+			bi.category,
+			bi.default_unit,
+			bi.storage_days,
+			di.amount,
+			di.unit,
+			di.notes,
+			di.sort_order
+		FROM dish_ingredients di
+		JOIN ingredients bi ON di.ingredient_id = bi.id
+		WHERE di.dish_id = $1
+		ORDER BY di.sort_order ASC, di.id ASC
 	`
 
 	rows, err := r.db.Query(query, dishID)
@@ -230,22 +243,32 @@ func (r *DishRepository) GetIngredients(dishID string) ([]*models.Ingredient, er
 	var ingredients []*models.Ingredient
 	for rows.Next() {
 		ingredient := &models.Ingredient{}
+		var nameEn sql.NullString
 		var category sql.NullString
+		var defaultUnit sql.NullString
 		var storage sql.NullInt64
+		var notes sql.NullString
 		if err := rows.Scan(
 			&ingredient.ID,
 			&ingredient.DishID,
-			&ingredient.Name,
+			&ingredient.IngredientID,
+			&ingredient.IngredientName,
+			&nameEn,
+			&category,
+			&defaultUnit,
+			&storage,
 			&ingredient.Amount,
 			&ingredient.Unit,
-			&category,
-			&storage,
+			&notes,
 			&ingredient.SortOrder,
 		); err != nil {
 			return nil, fmt.Errorf("failed to scan ingredient: %w", err)
 		}
 
+		ingredient.IngredientNameEn = nullableString(nameEn)
 		ingredient.Category = nullableString(category)
+		ingredient.DefaultUnit = nullableString(defaultUnit)
+		ingredient.Notes = nullableString(notes)
 		if storage.Valid {
 			value := int(storage.Int64)
 			ingredient.StorageDays = &value
@@ -407,7 +430,7 @@ func (r *DishRepository) SoftDeleteDish(dishID, familyID string) error {
 		return err
 	}
 
-	if _, err = tx.ExecContext(ctx, `DELETE FROM ingredients WHERE dish_id = $1`, dishID); err != nil {
+	if _, err = tx.ExecContext(ctx, `DELETE FROM dish_ingredients WHERE dish_id = $1`, dishID); err != nil {
 		return fmt.Errorf("failed to delete ingredients: %w", err)
 	}
 
@@ -432,29 +455,22 @@ func (r *DishRepository) insertIngredients(ctx context.Context, tx *sql.Tx, dish
 	}
 
 	query := `
-		INSERT INTO ingredients (id, dish_id, name, amount, unit, category, storage_days, sort_order)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO dish_ingredients (id, dish_id, ingredient_id, amount, unit, notes, sort_order)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
 
 	for _, ingredient := range ingredients {
 		ingredient.DishID = dishID
-		var storage interface{}
-		if ingredient.StorageDays != nil {
-			storage = *ingredient.StorageDays
-		} else {
-			storage = nil
-		}
 
 		if _, err := tx.ExecContext(
 			ctx,
 			query,
 			ingredient.ID,
 			ingredient.DishID,
-			ingredient.Name,
+			ingredient.IngredientID,
 			ingredient.Amount,
 			ingredient.Unit,
-			nullString(ingredient.Category),
-			storage,
+			nullString(ingredient.Notes),
 			ingredient.SortOrder,
 		); err != nil {
 			return fmt.Errorf("failed to insert ingredient: %w", err)

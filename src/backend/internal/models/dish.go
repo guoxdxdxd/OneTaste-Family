@@ -2,14 +2,13 @@ package models
 
 import "time"
 
-// IngredientInput 食材入参
+// IngredientInput 菜式食材入参
 type IngredientInput struct {
-	Name        string  `json:"name" binding:"required,max=100"`
-	Amount      float64 `json:"amount" binding:"required,gt=0"`
-	Unit        string  `json:"unit" binding:"required,max=20"`
-	Category    string  `json:"category" binding:"omitempty,max=50"`
-	StorageDays *int    `json:"storage_days" binding:"omitempty,min=0,max=365"`
-	SortOrder   int     `json:"sort_order" binding:"omitempty,min=0,max=1000"`
+	IngredientID string  `json:"ingredient_id" binding:"required,len=26"`
+	Amount       float64 `json:"amount" binding:"required,gt=0"`
+	Unit         string  `json:"unit" binding:"required,max=20"`
+	Notes        string  `json:"notes" binding:"omitempty,max=255"`
+	SortOrder    int     `json:"sort_order" binding:"omitempty,min=0,max=1000"`
 }
 
 // CookingStepInput 烹饪步骤入参
@@ -58,16 +57,63 @@ type Dish struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-// Ingredient 食材实体
+// BasicIngredient 基础食材实体
+type BasicIngredient struct {
+	ID          string
+	Name        string
+	NameEN      string
+	Category    string
+	DefaultUnit string
+	StorageDays *int
+	Description string
+	IsActive    bool
+}
+
+// IngredientSearchResult 食材搜索结果
+type IngredientSearchResult struct {
+	IngredientID string `json:"ingredient_id"`
+	Name         string `json:"name"`
+	Category     string `json:"category"`
+	DefaultUnit  string `json:"default_unit,omitempty"`
+	StorageDays  *int   `json:"storage_days,omitempty"`
+}
+
+// IngredientCategoryQuery 食材分类分页查询
+type IngredientCategoryQuery struct {
+	Category string `form:"category" binding:"required,max=50"`
+	Keyword  string `form:"keyword" binding:"omitempty,max=50"`
+	Page     int    `form:"page,default=1" binding:"min=1"`
+	PageSize int    `form:"page_size,default=20" binding:"min=1,max=50"`
+}
+
+// IngredientSearchQuery 食材模糊搜索
+type IngredientSearchQuery struct {
+	Keyword string `form:"keyword" binding:"required,max=50"`
+	Limit   int    `form:"limit,default=10" binding:"min=1,max=20"`
+}
+
+// IngredientCategoryListResponse 食材列表响应
+type IngredientCategoryListResponse struct {
+	Items    []*IngredientSearchResult `json:"items"`
+	Page     int                       `json:"page"`
+	PageSize int                       `json:"page_size"`
+	Total    int64                     `json:"total"`
+}
+
+// Ingredient 菜式食材实体
 type Ingredient struct {
-	ID          string  `json:"ingredient_id"`
-	DishID      string  `json:"-"`
-	Name        string  `json:"name"`
-	Amount      float64 `json:"amount"`
-	Unit        string  `json:"unit"`
-	Category    string  `json:"category,omitempty"`
-	StorageDays *int    `json:"storage_days,omitempty"`
-	SortOrder   int     `json:"sort_order"`
+	ID               string  `json:"id"`
+	DishID           string  `json:"-"`
+	IngredientID     string  `json:"ingredient_id"`
+	IngredientName   string  `json:"ingredient_name"`
+	IngredientNameEn string  `json:"ingredient_name_en,omitempty"`
+	Category         string  `json:"category,omitempty"`
+	DefaultUnit      string  `json:"default_unit,omitempty"`
+	Amount           float64 `json:"amount"`
+	Unit             string  `json:"unit"`
+	Notes            string  `json:"notes,omitempty"`
+	StorageDays      *int    `json:"storage_days,omitempty"`
+	SortOrder        int     `json:"sort_order"`
 }
 
 // CookingStep 烹饪步骤实体
@@ -81,8 +127,12 @@ type CookingStep struct {
 
 // DishCreateResponse 创建菜式响应
 type DishCreateResponse struct {
-	DishID string `json:"dish_id"`
-	Name   string `json:"name"`
+	DishID      string        `json:"dish_id"`
+	Name        string        `json:"name"`
+	Category    string        `json:"category,omitempty"`
+	Description string        `json:"description,omitempty"`
+	ImageURL    string        `json:"image_url,omitempty"`
+	Ingredients []*Ingredient `json:"ingredients"`
 }
 
 // DishSummary 菜式列表项

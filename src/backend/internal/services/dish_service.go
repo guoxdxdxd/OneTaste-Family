@@ -35,15 +35,17 @@ var (
 
 // DishService 菜式业务逻辑层
 type DishService struct {
-	dishRepo   *repositories.DishRepository
-	familyRepo *repositories.FamilyRepository
+	dishRepo       *repositories.DishRepository
+	familyRepo     *repositories.FamilyRepository
+	ingredientRepo *repositories.IngredientRepository
 }
 
 // NewDishService 创建DishService
 func NewDishService() *DishService {
 	return &DishService{
-		dishRepo:   repositories.NewDishRepository(),
-		familyRepo: repositories.NewFamilyRepository(),
+		dishRepo:       repositories.NewDishRepository(),
+		familyRepo:     repositories.NewFamilyRepository(),
+		ingredientRepo: repositories.NewIngredientRepository(),
 	}
 }
 
@@ -82,7 +84,16 @@ func (s *DishService) CreateDish(userID string, req *models.CreateDishRequest) (
 		return nil, ErrDishNameExists
 	}
 
-	ingredients, err := convertIngredients(req.Ingredients)
+	baseIDs := collectIngredientIDs(req.Ingredients)
+	ingredientDict, err := s.ingredientRepo.GetActiveByIDs(baseIDs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load ingredients: %w", err)
+	}
+	if len(ingredientDict) != len(baseIDs) {
+		return nil, ErrInvalidDishIngredients
+	}
+
+	ingredients, err := convertIngredients(req.Ingredients, ingredientDict)
 	if err != nil {
 		return nil, err
 	}
@@ -107,8 +118,12 @@ func (s *DishService) CreateDish(userID string, req *models.CreateDishRequest) (
 	}
 
 	return &models.DishCreateResponse{
-		DishID: dish.ID,
-		Name:   dish.Name,
+		DishID:      dish.ID,
+		Name:        dish.Name,
+		Category:    dish.Category,
+		Description: dish.Description,
+		ImageURL:    dish.ImageURL,
+		Ingredients: ingredients,
 	}, nil
 }
 
@@ -204,7 +219,16 @@ func (s *DishService) UpdateDish(userID, dishID string, req *models.UpdateDishRe
 		}
 	}
 
-	ingredients, err := convertIngredients(req.Ingredients)
+	baseIDs := collectIngredientIDs(req.Ingredients)
+	ingredientDict, err := s.ingredientRepo.GetActiveByIDs(baseIDs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load ingredients: %w", err)
+	}
+	if len(ingredientDict) != len(baseIDs) {
+		return nil, ErrInvalidDishIngredients
+	}
+
+	ingredients, err := convertIngredients(req.Ingredients, ingredientDict)
 	if err != nil {
 		return nil, err
 	}
@@ -269,36 +293,51 @@ func (s *DishService) getFamilyForUser(userID string) (*models.Family, error) {
 	return family, nil
 }
 
-func convertIngredients(inputs []models.IngredientInput) ([]*models.Ingredient, error) {
+func convertIngredients(inputs []models.IngredientInput, baseMap map[string]*models.BasicIngredient) ([]*models.Ingredient, error) {
 	if len(inputs) == 0 {
 		return nil, ErrInvalidDishIngredients
 	}
 
 	ingredients := make([]*models.Ingredient, 0, len(inputs))
+	seen := make(map[string]struct{}, len(inputs))
 	for index, input := range inputs {
-		name := strings.TrimSpace(input.Name)
+		ingredientID := strings.TrimSpace(input.IngredientID)
 		unit := strings.TrimSpace(input.Unit)
-		if name == "" || unit == "" {
+		if ingredientID == "" || unit == "" {
 			return nil, ErrInvalidDishIngredients
 		}
+
+		base, ok := baseMap[ingredientID]
+		if !ok {
+			return nil, ErrInvalidDishIngredients
+		}
+
+		key := ingredientID + "|" + strings.ToLower(unit)
+		if _, exists := seen[key]; exists {
+			return nil, ErrInvalidDishIngredients
+		}
+		seen[key] = struct{}{}
 
 		sortOrder := input.SortOrder
 		if sortOrder <= 0 {
 			sortOrder = index + 1
 		}
 
-		category := strings.TrimSpace(input.Category)
 		ingredient := &models.Ingredient{
-			ID:        utils.GenerateULID(),
-			Name:      name,
-			Amount:    input.Amount,
-			Unit:      unit,
-			Category:  category,
-			SortOrder: sortOrder,
+			ID:               utils.GenerateULID(),
+			IngredientID:     ingredientID,
+			IngredientName:   base.Name,
+			IngredientNameEn: base.NameEN,
+			Category:         base.Category,
+			DefaultUnit:      base.DefaultUnit,
+			Amount:           input.Amount,
+			Unit:             unit,
+			Notes:            strings.TrimSpace(input.Notes),
+			SortOrder:        sortOrder,
 		}
 
-		if input.StorageDays != nil && *input.StorageDays >= 0 {
-			value := *input.StorageDays
+		if base.StorageDays != nil && *base.StorageDays >= 0 {
+			value := *base.StorageDays
 			ingredient.StorageDays = &value
 		}
 
@@ -313,6 +352,23 @@ func convertIngredients(inputs []models.IngredientInput) ([]*models.Ingredient, 
 	})
 
 	return ingredients, nil
+}
+
+func collectIngredientIDs(inputs []models.IngredientInput) []string {
+	ids := make([]string, 0, len(inputs))
+	seen := make(map[string]struct{}, len(inputs))
+	for _, input := range inputs {
+		id := strings.TrimSpace(input.IngredientID)
+		if id == "" {
+			continue
+		}
+		if _, exists := seen[id]; exists {
+			continue
+		}
+		seen[id] = struct{}{}
+		ids = append(ids, id)
+	}
+	return ids
 }
 
 func convertCookingSteps(inputs []models.CookingStepInput) ([]*models.CookingStep, error) {

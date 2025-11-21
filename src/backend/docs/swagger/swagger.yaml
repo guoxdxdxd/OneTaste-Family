@@ -87,8 +87,18 @@ definitions:
     type: object
   models.DishCreateResponse:
     properties:
+      category:
+        type: string
+      description:
+        type: string
       dish_id:
         type: string
+      image_url:
+        type: string
+      ingredients:
+        items:
+          $ref: '#/definitions/models.Ingredient'
+        type: array
       name:
         type: string
     type: object
@@ -247,9 +257,17 @@ definitions:
         type: number
       category:
         type: string
+      default_unit:
+        type: string
+      id:
+        type: string
       ingredient_id:
         type: string
-      name:
+      ingredient_name:
+        type: string
+      ingredient_name_en:
+        type: string
+      notes:
         type: string
       sort_order:
         type: integer
@@ -258,22 +276,30 @@ definitions:
       unit:
         type: string
     type: object
+  models.IngredientCategoryListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.IngredientSearchResult'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+    type: object
   models.IngredientInput:
     properties:
       amount:
         type: number
-      category:
-        maxLength: 50
+      ingredient_id:
         type: string
-      name:
-        maxLength: 100
+      notes:
+        maxLength: 255
         type: string
       sort_order:
         maximum: 1000
-        minimum: 0
-        type: integer
-      storage_days:
-        maximum: 365
         minimum: 0
         type: integer
       unit:
@@ -281,8 +307,21 @@ definitions:
         type: string
     required:
     - amount
-    - name
+    - ingredient_id
     - unit
+    type: object
+  models.IngredientSearchResult:
+    properties:
+      category:
+        type: string
+      default_unit:
+        type: string
+      ingredient_id:
+        type: string
+      name:
+        type: string
+      storage_days:
+        type: integer
     type: object
   models.LoginRequest:
     description: 用户登录请求参数
@@ -983,6 +1022,103 @@ paths:
       summary: 健康检查
       tags:
       - 系统
+  /ingredients/by-category:
+    get:
+      consumes:
+      - application/json
+      description: 用户根据分类浏览基础食材
+      parameters:
+      - description: 食材分类
+        in: query
+        name: category
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 分类内模糊搜索
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.IngredientCategoryListResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 按分类分页查询食材
+      tags:
+      - 食材
+  /ingredients/search:
+    get:
+      consumes:
+      - application/json
+      description: 根据关键字返回最多10条可用基础食材
+      parameters:
+      - description: 关键字
+        in: query
+        name: keyword
+        required: true
+        type: string
+      - description: 返回条数 (1-20, 默认10)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 搜索成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  additionalProperties: true
+                  type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 食材模糊搜索
+      tags:
+      - 食材
   /media/upload:
     post:
       consumes:

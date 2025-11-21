@@ -844,6 +844,165 @@
                 }
             }
         },
+        "/ingredients/by-category": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "用户根据分类浏览基础食材",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "食材"
+                ],
+                "summary": "按分类分页查询食材",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "食材分类",
+                        "name": "category",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "分类内模糊搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.IngredientCategoryListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/ingredients/search": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据关键字返回最多10条可用基础食材",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "食材"
+                ],
+                "summary": "食材模糊搜索",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "关键字",
+                        "name": "keyword",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "返回条数 (1-20, 默认10)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "搜索成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": true
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/media/upload": {
             "post": {
                 "security": [
@@ -1099,8 +1258,23 @@
         "models.DishCreateResponse": {
             "type": "object",
             "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
                 "dish_id": {
                     "type": "string"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "ingredients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Ingredient"
+                    }
                 },
                 "name": {
                     "type": "string"
@@ -1329,10 +1503,22 @@
                 "category": {
                     "type": "string"
                 },
+                "default_unit": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
                 "ingredient_id": {
                     "type": "string"
                 },
-                "name": {
+                "ingredient_name": {
+                    "type": "string"
+                },
+                "ingredient_name_en": {
+                    "type": "string"
+                },
+                "notes": {
                     "type": "string"
                 },
                 "sort_order": {
@@ -1346,38 +1532,72 @@
                 }
             }
         },
+        "models.IngredientCategoryListResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.IngredientSearchResult"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.IngredientInput": {
             "type": "object",
             "required": [
                 "amount",
-                "name",
+                "ingredient_id",
                 "unit"
             ],
             "properties": {
                 "amount": {
                     "type": "number"
                 },
-                "category": {
-                    "type": "string",
-                    "maxLength": 50
+                "ingredient_id": {
+                    "type": "string"
                 },
-                "name": {
+                "notes": {
                     "type": "string",
-                    "maxLength": 100
+                    "maxLength": 255
                 },
                 "sort_order": {
                     "type": "integer",
                     "maximum": 1000,
                     "minimum": 0
                 },
-                "storage_days": {
-                    "type": "integer",
-                    "maximum": 365,
-                    "minimum": 0
-                },
                 "unit": {
                     "type": "string",
                     "maxLength": 20
+                }
+            }
+        },
+        "models.IngredientSearchResult": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "default_unit": {
+                    "type": "string"
+                },
+                "ingredient_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "storage_days": {
+                    "type": "integer"
                 }
             }
         },
