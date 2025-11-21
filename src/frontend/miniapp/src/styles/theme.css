@@ -1,48 +1,33 @@
 :root {
   --color-background: #fffaf6;
   --color-surface: #fff5ef;
+  --color-surface-muted: #ffe9dd;
   --color-card: #ffffff;
   --color-border: #f3dfd4;
+  --color-border-strong: #d8bba7;
   --color-accent: #f08a5d;
   --color-accent-soft: #f9b995;
+  --color-primary: #f08a5d;
+  --color-primary-dark: #dd7243;
+  --color-primary-soft: #f9b995;
   --color-muted: #c08b72;
+  --color-success: #2cb67d;
+  --color-warning: #f6c343;
+  --color-danger: #f25f4c;
+  --color-text-heading: #3b261d;
   --color-text-primary: #5a3b2e;
   --color-text-secondary: #a07e6b;
   --shadow-card: 0 12px 35px rgba(216, 150, 122, 0.18);
+  --shadow-soft: 0 6px 18px rgba(216, 150, 122, 0.14);
   --radius-large: 20px;
   --radius-medium: 14px;
   --radius-small: 10px;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: var(--color-background);
-  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
-  color: var(--color-text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  color: var(--color-accent);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-a:hover {
-  color: var(--color-muted);
-}
-
-#app {
-  min-height: 100vh;
-}
-
-::selection {
-  background: rgba(240, 138, 93, 0.2);
-  color: var(--color-text-primary);
+  --radius-pill: 999px;
+  --font-family-base: 'PingFang SC', 'Hiragino Sans GB', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+  --font-size-base: 16px;
+  --font-size-sm: 14px;
+  --font-size-xs: 12px;
+  --line-height-base: 1.6;
+  --space-base: 8px;
+  --transition-base: 0.2s ease;
 }

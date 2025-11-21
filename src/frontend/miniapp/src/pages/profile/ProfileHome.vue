@@ -1,5 +1,5 @@
 <template>
-  <div class="profile-page">
+  <div class="profile-page page">
     <section class="card hero">
       <div>
         <p class="eyebrow">我的家庭空间</p>
@@ -38,7 +38,12 @@
           <h2>创建家庭</h2>
           <p>每位用户仅能创建或加入一个家庭，请谨慎填写名称。</p>
         </div>
-        <button type="button" class="ghost" @click="refreshInfo" :disabled="familyStore.infoLoading">
+        <button
+          type="button"
+          class="btn btn-ghost btn--sm"
+          @click="refreshInfo"
+          :disabled="familyStore.infoLoading"
+        >
           {{ familyStore.infoLoading ? '同步中...' : '刷新状态' }}
         </button>
       </header>
@@ -49,7 +54,7 @@
           <input
             v-model="createForm.name"
             type="text"
-            :class="{ error: createErrors.name }"
+            :class="['form-control', { error: createErrors.name }]"
             maxlength="20"
             placeholder="例如：张家的厨房"
           />
@@ -59,12 +64,13 @@
           <span>家庭描述（可选）</span>
           <textarea
             v-model="createForm.description"
+            class="form-control"
             maxlength="100"
             placeholder="给家人一段温柔介绍"
           />
         </label>
         <p v-if="feedback" class="feedback" :class="{ error: feedbackType === 'error', success: feedbackType === 'success' }">{{ feedback }}</p>
-        <button type="submit" :disabled="familyStore.createLoading">
+        <button type="submit" class="btn btn-primary btn--full" :disabled="familyStore.createLoading">
           {{ familyStore.createLoading ? '创建中...' : '创建家庭' }}
         </button>
       </form>
@@ -77,7 +83,12 @@
             <p class="label">家庭名称</p>
             <h2>{{ familyStore.familyName }}</h2>
           </div>
-          <button type="button" class="ghost" @click="refreshInfo" :disabled="familyStore.infoLoading">
+          <button
+            type="button"
+            class="btn btn-ghost btn--sm"
+            @click="refreshInfo"
+            :disabled="familyStore.infoLoading"
+          >
             {{ familyStore.infoLoading ? '同步中...' : '刷新信息' }}
           </button>
         </header>
@@ -98,13 +109,44 @@
         </dl>
       </article>
 
+      <article class="card recipes-card">
+        <header>
+          <div>
+            <h2>菜谱管理</h2>
+            <p class="desc">
+              统一管理家庭菜式，支持创建、编辑、删除，并配套基础食材库输入体验。
+            </p>
+          </div>
+          <div class="usage-pill">
+            <span>已用 / 上限</span>
+            <strong>{{ dishUsageText }}</strong>
+          </div>
+        </header>
+        <div class="recipe-actions">
+          <button
+            type="button"
+            class="btn btn-primary"
+            :disabled="!familyStore.hasFamily"
+            @click="goRecipeManagement"
+          >
+            打开菜谱管理
+          </button>
+          <small>入口位于家庭空间，无需额外下载。</small>
+        </div>
+      </article>
+
       <article class="card members-card">
         <header>
           <div>
             <h2>家庭成员</h2>
             <p class="desc">查看角色、加入时间，Owner 可在此扩展编辑操作。</p>
           </div>
-          <button type="button" class="ghost" @click="refreshMembers" :disabled="familyStore.membersLoading">
+          <button
+            type="button"
+            class="btn btn-ghost btn--sm"
+            @click="refreshMembers"
+            :disabled="familyStore.membersLoading"
+          >
             {{ familyStore.membersLoading ? '加载中...' : '刷新列表' }}
           </button>
         </header>
@@ -132,8 +174,13 @@
         <div class="invite-link">
           <label>邀请链接</label>
           <div class="link-row">
-            <input :value="inviteLink" readonly />
-            <button type="button" @click="copyInviteLink" :disabled="!canInvite || copying || !inviteLink">
+            <input :value="inviteLink" class="form-control" readonly />
+            <button
+              type="button"
+              class="btn btn-primary btn--sm"
+              @click="copyInviteLink"
+              :disabled="!canInvite || copying || !inviteLink"
+            >
               {{ copying ? '复制中...' : '复制' }}
             </button>
           </div>
@@ -170,12 +217,14 @@
 
 <script setup>
 import { computed, reactive, ref, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import QRCode from 'qrcode'
 import { useUserStore } from '@/stores/user'
 import { useFamilyStore } from '@/stores/family'
 
 const userStore = useUserStore()
 const familyStore = useFamilyStore()
+const router = useRouter()
 
 const greeting = computed(() => {
   return userStore.nickname ? `${userStore.nickname}，欢迎回家` : '欢迎回到家庭空间'
@@ -210,6 +259,12 @@ const qrLoading = ref(false)
 const qrError = ref('')
 
 const showCreate = computed(() => !familyStore.hasFamily)
+
+const dishUsageText = computed(() => {
+  const used = familyStore.familyInfo?.dish_count || 0
+  const max = familyStore.familyInfo?.max_dishes || 30
+  return `${used} / ${max}`
+})
 
 const normalizeId = (value) => {
   if (value === undefined || value === null) return null
@@ -374,6 +429,14 @@ const copyInviteLink = async () => {
 
 const formatRole = (role) => (role === 'owner' ? '管理员' : '成员')
 
+const goRecipeManagement = () => {
+  if (!familyStore.hasFamily) {
+    window.alert('请先创建或加入家庭')
+    return
+  }
+  router.push('/recipes')
+}
+
 const formatJoinedAt = (value) => {
   if (!value) return '时间未知'
   const date = new Date(value)
@@ -404,41 +467,10 @@ watch(
 </script>
 
 <style scoped>
-.profile-page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 32px 20px 120px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.card {
-  background: var(--color-card);
-  border-radius: var(--radius-large);
-  padding: 28px;
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
-}
-
 .hero {
   display: flex;
   flex-direction: column;
   gap: 18px;
-}
-
-.eyebrow {
-  font-size: 12px;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-  margin-bottom: 4px;
-}
-
-.subtitle {
-  margin: 0;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
 }
 
 .hero-tags {
@@ -495,14 +527,6 @@ watch(
   margin-bottom: 20px;
 }
 
-.ghost {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-medium);
-  padding: 8px 14px;
-  background: var(--color-surface);
-  cursor: pointer;
-}
-
 .create-form {
   display: flex;
   flex-direction: column;
@@ -515,38 +539,9 @@ watch(
   gap: 6px;
 }
 
-.create-form input,
-.create-form textarea {
-  border-radius: var(--radius-medium);
-  border: 1px solid var(--color-border);
-  padding: 12px;
-  background: var(--color-surface);
-}
-
 .create-form textarea {
   min-height: 80px;
   resize: vertical;
-}
-
-.create-form input.error {
-  border-color: #ff6b6b;
-}
-
-.create-form button,
-.members-card button:not(.ghost),
-.invite-card button:not(.ghost) {
-  border: none;
-  border-radius: var(--radius-medium);
-  background: linear-gradient(120deg, var(--color-accent), var(--color-accent-soft));
-  color: #fff;
-  padding: 12px 20px;
-  cursor: pointer;
-}
-
-.create-form button:disabled,
-.invite-card button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .error-text {
@@ -633,6 +628,42 @@ watch(
   color: #2cb67d;
 }
 
+.recipes-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.usage-pill {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  padding: 12px;
+  text-align: center;
+}
+
+.usage-pill span {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.usage-pill strong {
+  font-size: 20px;
+}
+
+
+.recipe-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recipe-actions small {
+  color: var(--color-text-secondary);
+}
+
 .invite-card.disabled {
   opacity: 0.7;
 }
@@ -650,10 +681,6 @@ watch(
 
 .link-row input {
   flex: 1;
-  border-radius: var(--radius-medium);
-  border: 1px solid var(--color-border);
-  padding: 10px;
-  background: var(--color-surface);
 }
 
 .qr-area {

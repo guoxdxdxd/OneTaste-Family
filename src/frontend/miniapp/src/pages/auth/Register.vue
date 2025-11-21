@@ -1,6 +1,6 @@
 <template>
   <div class="auth-page">
-    <div class="auth-card">
+    <div class="auth-card card">
       <header class="card-header">
         <p class="eyebrow">一家一味 · 注册</p>
         <h1>创建家庭账号</h1>
@@ -14,7 +14,7 @@
             id="phone"
             v-model="form.phone"
             type="tel"
-            :class="{ error: errors.phone }"
+            :class="['form-control', { error: errors.phone }]"
             placeholder="请输入手机号"
             maxlength="11"
             @blur="validatePhone"
@@ -29,7 +29,7 @@
             id="password"
             v-model="form.password"
             type="password"
-            :class="{ error: errors.password }"
+            :class="['form-control', { error: errors.password }]"
             placeholder="请输入密码（6-20位）"
             @blur="validatePassword"
             @input="clearError('password')"
@@ -43,7 +43,7 @@
             id="nickname"
             v-model="form.nickname"
             type="text"
-            :class="{ error: errors.nickname }"
+            :class="['form-control', { error: errors.nickname }]"
             placeholder="请输入昵称"
             maxlength="20"
             @blur="validateNickname"
@@ -59,7 +59,7 @@
               id="verify_code"
               v-model="form.verify_code"
               type="text"
-              :class="{ error: errors.verify_code }"
+              :class="['form-control', { error: errors.verify_code }]"
               placeholder="请输入图形验证码"
               maxlength="4"
               autocomplete="off"
@@ -80,7 +80,12 @@
                   {{ captcha.loading ? '生成中…' : '点击获取' }}
                 </span>
               </div>
-              <button type="button" class="ghost small" :disabled="captcha.loading" @click="refreshCaptcha">
+              <button
+                type="button"
+                class="btn btn-ghost btn--sm"
+                :disabled="captcha.loading"
+                @click="refreshCaptcha"
+              >
                 {{ captcha.loading ? '生成中…' : '换一张' }}
               </button>
             </div>
@@ -92,7 +97,7 @@
           {{ errorMessage }}
         </div>
 
-        <button type="submit" :disabled="loading">
+        <button type="submit" class="btn btn-gradient btn--full" :disabled="loading">
           <span v-if="loading">注册中...</span>
           <span v-else>完成注册</span>
         </button>
@@ -319,11 +324,7 @@ onBeforeUnmount(() => {
 .auth-card {
   width: 100%;
   max-width: 460px;
-  background: var(--color-card);
-  border-radius: var(--radius-large);
   padding: 32px;
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -365,24 +366,6 @@ onBeforeUnmount(() => {
 .form-group label {
   font-size: 14px;
   color: var(--color-text-primary);
-}
-
-.form-group input {
-  height: 46px;
-  border-radius: var(--radius-medium);
-  border: 1px solid var(--color-border);
-  padding: 0 14px;
-  font-size: 15px;
-  transition: border 0.2s ease;
-}
-
-.form-group input:focus {
-  border-color: var(--color-accent);
-  outline: none;
-}
-
-.form-group input.error {
-  border-color: #e17055;
 }
 
 .verify-row {
@@ -440,12 +423,6 @@ onBeforeUnmount(() => {
   text-align: center;
 }
 
-button.ghost.small {
-  height: 34px;
-  padding: 0 12px;
-  font-size: 13px;
-}
-
 .error-message {
   font-size: 12px;
   color: #c44536;
@@ -458,34 +435,6 @@ button.ghost.small {
   color: #a3412b;
   font-size: 14px;
   border: 1px solid #ffd3c7;
-}
-
-button {
-  height: 46px;
-  border: none;
-  border-radius: var(--radius-medium);
-  background: linear-gradient(120deg, var(--color-accent), var(--color-accent-soft));
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-}
-
-button.ghost {
-  background: transparent;
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-}
-
-button.ghost:hover:not(:disabled) {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .card-footer {

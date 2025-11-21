@@ -1,6 +1,6 @@
 <template>
   <div class="auth-page">
-    <div class="auth-card">
+    <div class="auth-card card">
       <header class="card-header">
         <p class="eyebrow">一家一味 · 登录</p>
         <h1>欢迎回来</h1>
@@ -18,7 +18,7 @@
             id="phone"
             v-model="form.phone"
             type="tel"
-            :class="{ error: errors.phone }"
+            :class="['form-control', { error: errors.phone }]"
             placeholder="请输入手机号"
             maxlength="11"
             @blur="validatePhone"
@@ -33,7 +33,7 @@
             id="password"
             v-model="form.password"
             type="password"
-            :class="{ error: errors.password }"
+            :class="['form-control', { error: errors.password }]"
             placeholder="请输入密码"
             @blur="validatePassword"
             @input="clearError('password')"
@@ -45,7 +45,7 @@
           {{ errorMessage }}
         </div>
 
-        <button type="submit" :disabled="loading">
+        <button type="submit" class="btn btn-gradient btn--full" :disabled="loading">
           <span v-if="loading">登录中...</span>
           <span v-else>进入家庭空间</span>
         </button>
@@ -156,11 +156,7 @@ const handleLogin = async () => {
 .auth-card {
   width: 100%;
   max-width: 420px;
-  background: var(--color-card);
-  border-radius: var(--radius-large);
   padding: 32px;
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -223,24 +219,6 @@ const handleLogin = async () => {
   color: var(--color-text-primary);
 }
 
-.form-group input {
-  height: 46px;
-  border-radius: var(--radius-medium);
-  border: 1px solid var(--color-border);
-  padding: 0 14px;
-  font-size: 15px;
-  transition: border 0.2s ease;
-}
-
-.form-group input:focus {
-  border-color: var(--color-accent);
-  outline: none;
-}
-
-.form-group input.error {
-  border-color: #e17055;
-}
-
 .error-message {
   font-size: 12px;
   color: #c44536;
@@ -253,23 +231,6 @@ const handleLogin = async () => {
   color: #a3412b;
   font-size: 14px;
   border: 1px solid #ffd3c7;
-}
-
-button {
-  height: 46px;
-  border: none;
-  border-radius: var(--radius-medium);
-  background: linear-gradient(120deg, var(--color-accent), var(--color-accent-soft));
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .card-footer {

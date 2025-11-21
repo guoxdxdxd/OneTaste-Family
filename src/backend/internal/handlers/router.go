@@ -62,6 +62,18 @@ func RegisterDishRoutes(api *gin.RouterGroup) {
 	}
 }
 
+// RegisterIngredientRoutes 注册基础食材用户接口
+func RegisterIngredientRoutes(api *gin.RouterGroup) {
+    ingredientHandler := NewIngredientHandler()
+
+    ingredients := api.Group("/ingredients")
+    ingredients.Use(middleware.AuthMiddleware())
+    {
+        ingredients.GET("/search", ingredientHandler.SearchIngredients)
+        ingredients.GET("/by-category", ingredientHandler.GetIngredientsByCategory)
+    }
+}
+
 // RegisterMediaRoutes 注册媒体上传路由
 func RegisterMediaRoutes(api *gin.RouterGroup) {
 	mediaHandler := NewMediaHandler()

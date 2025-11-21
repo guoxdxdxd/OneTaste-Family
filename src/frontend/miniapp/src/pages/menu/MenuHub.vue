@@ -1,5 +1,5 @@
 <template>
-  <div class="menu-page">
+  <div class="menu-page page">
     <section class="menu-hero card">
       <div>
         <p class="eyebrow">一家一味 · 菜单中枢</p>
@@ -17,7 +17,7 @@
     </section>
 
     <section class="menu-actions">
-      <article class="action-card">
+      <article class="card card--compact action-card">
         <header>
           <h3>快速创建菜单</h3>
           <p>选择日期与餐次，从家庭食谱挑选菜式，形成今日菜单。</p>
@@ -27,11 +27,11 @@
             <p class="label">需要做的事</p>
             <p class="value">早餐 · 午餐 · 晚餐</p>
           </div>
-          <button type="button">即将开放</button>
+          <button type="button" class="btn btn-gradient">即将开放</button>
         </div>
       </article>
 
-      <article class="action-card">
+      <article class="card card--compact action-card">
         <header>
           <h3>菜单视图切换</h3>
           <p>预留每日/每周/月度视图切换区域，统一了解全家饮食节奏。</p>
@@ -48,7 +48,7 @@
       <article
         v-for="meal in sampleMeals"
         :key="meal.label"
-        class="meal-card"
+        class="card card--compact meal-card"
       >
         <header>
           <span class="meal-label">{{ meal.label }}</span>
@@ -61,7 +61,7 @@
         </ul>
         <footer>
           <span>预计 {{ meal.duration }}</span>
-          <button type="button">替换菜式</button>
+          <button type="button" class="btn btn-ghost btn--sm">替换菜式</button>
         </footer>
       </article>
     </section>
@@ -84,11 +84,11 @@
         <article
           v-for="action in aiActions"
           :key="action.title"
-          class="ai-card"
+          class="card card--compact ai-card"
         >
           <h3>{{ action.title }}</h3>
           <p>{{ action.desc }}</p>
-          <button type="button">{{ action.cta }}</button>
+          <button type="button" class="btn btn-gradient btn--sm">{{ action.cta }}</button>
         </article>
       </div>
     </section>
@@ -132,46 +132,15 @@ const aiActions = [
 </script>
 
 <style scoped>
-.menu-page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 32px 20px 120px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.card {
-  background: var(--color-card);
-  border-radius: var(--radius-large);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
-  padding: 28px;
-}
-
 .menu-hero {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.eyebrow {
-  font-size: 12px;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-  margin-bottom: 8px;
-}
-
 .menu-hero h1 {
   margin: 0 0 8px;
   font-size: 30px;
-}
-
-.subtitle {
-  margin: 0;
-  color: var(--color-text-secondary);
-  line-height: 1.6;
 }
 
 .today-plan {
@@ -201,10 +170,6 @@ const aiActions = [
 }
 
 .action-card {
-  background: var(--color-card);
-  border-radius: var(--radius-large);
-  border: 1px solid var(--color-border);
-  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -238,34 +203,10 @@ const aiActions = [
   font-weight: 600;
 }
 
-.action-row button,
-.meal-card button,
-.ai-card button {
-  border: none;
-  background: linear-gradient(120deg, var(--color-accent), var(--color-accent-soft));
-  color: #fff;
-  border-radius: var(--radius-medium);
-  padding: 10px 20px;
-  cursor: pointer;
-}
-
 .view-pills {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-}
-
-.pill {
-  border-radius: 999px;
-  padding: 6px 14px;
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-}
-
-.pill.active {
-  border-color: transparent;
-  background: var(--color-surface);
-  color: var(--color-text-primary);
 }
 
 .meal-grid {
@@ -275,13 +216,10 @@ const aiActions = [
 }
 
 .meal-card {
-  background: var(--color-card);
-  border-radius: var(--radius-medium);
-  border: 1px solid var(--color-border);
-  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  border-radius: var(--radius-medium);
 }
 
 .meal-card header {
@@ -347,9 +285,6 @@ const aiActions = [
 }
 
 .ai-card {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-medium);
-  padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 12px;

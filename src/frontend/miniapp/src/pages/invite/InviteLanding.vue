@@ -24,14 +24,14 @@
 
       <div v-else-if="!userStore.loggedIn" class="login-hint">
         <p>登录后才能确认是否加入该家庭。</p>
-        <button type="button" @click="goLogin">去登录</button>
+        <button type="button" class="btn btn-primary btn--full" @click="goLogin">去登录</button>
       </div>
 
       <div v-else class="actions">
-        <button type="button" class="ghost" @click="handleReject" :disabled="accepting">
+        <button type="button" class="btn btn-ghost" @click="handleReject" :disabled="accepting">
           暂不加入
         </button>
-        <button type="button" @click="handleAccept" :disabled="accepting">
+        <button type="button" class="btn btn-primary" @click="handleAccept" :disabled="accepting">
           {{ accepting ? '处理中...' : '同意加入' }}
         </button>
       </div>
@@ -140,19 +140,6 @@ const handleReject = () => {
   gap: 18px;
 }
 
-.eyebrow {
-  font-size: 12px;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-}
-
-.subtitle {
-  margin: 0;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-}
-
 .invite-info {
   margin: 0;
   display: grid;
@@ -183,21 +170,10 @@ const handleReject = () => {
   gap: 12px;
 }
 
+
 .actions button,
 .login-hint button {
   flex: 1;
-  border: none;
-  border-radius: var(--radius-medium);
-  padding: 12px 18px;
-  cursor: pointer;
-  background: linear-gradient(120deg, var(--color-accent), var(--color-accent-soft));
-  color: #fff;
-}
-
-.ghost {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-primary);
 }
 
 .error-text {

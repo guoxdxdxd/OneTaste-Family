@@ -20,6 +20,15 @@ const routes = [
         redirect: '/menus'
       },
       {
+        path: 'recipes',
+        name: 'Recipes',
+        component: () => import('@/pages/recipes/RecipeManagement.vue'),
+        meta: {
+          requiresAuth: true,
+          title: '菜谱管理'
+        }
+      },
+      {
         path: 'menus',
         name: 'Menus',
         component: () => import('@/pages/menu/MenuHub.vue'),

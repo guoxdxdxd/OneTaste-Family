@@ -1,5 +1,5 @@
 <template>
-  <div class="shopping-page">
+  <div class="shopping-page page">
     <section class="card hero">
       <div>
         <p class="eyebrow">买菜 · 清单中心</p>
@@ -21,20 +21,20 @@
           <h2>自动生成购物清单</h2>
           <p>选择日期范围或直接引用菜单，系统自动合并相同食材并计算总量。</p>
         </div>
-        <button type="button">即将接入</button>
+        <button type="button" class="btn btn-gradient">即将接入</button>
       </header>
       <form class="generator-form">
         <label>
           <span>开始日期</span>
-          <input type="date" disabled />
+          <input type="date" class="form-control" disabled />
         </label>
         <label>
           <span>结束日期</span>
-          <input type="date" disabled />
+          <input type="date" class="form-control" disabled />
         </label>
         <label>
           <span>关联菜单</span>
-          <select disabled>
+          <select class="form-control" disabled>
             <option>本周菜单（3份）</option>
           </select>
         </label>
@@ -47,7 +47,11 @@
         <p>预留按分类展示、数量、单位、存放天数与状态切换的区域。</p>
       </header>
       <div class="categories">
-        <article v-for="category in categories" :key="category.name" class="category-card">
+        <article
+          v-for="category in categories"
+          :key="category.name"
+          class="card card--compact category-card"
+        >
           <header>
             <h3>{{ category.name }}</h3>
             <span>{{ category.count }} 项</span>
@@ -58,7 +62,7 @@
                 <strong>{{ item.name }}</strong>
                 <p>{{ item.quantity }}</p>
               </div>
-              <button type="button">标记</button>
+              <button type="button" class="btn btn-ghost btn--sm">标记</button>
             </li>
           </ul>
         </article>
@@ -71,9 +75,9 @@
         <p>添加/删除/修改数量、标记已购买等交互入口在此保留，方便后续直接绑定数据。</p>
       </div>
       <div class="editor-actions">
-        <button type="button">添加食材</button>
-        <button type="button">导入库存</button>
-        <button type="button">分享清单</button>
+        <button type="button" class="btn btn-ghost">添加食材</button>
+        <button type="button" class="btn btn-ghost">导入库存</button>
+        <button type="button" class="btn btn-ghost">分享清单</button>
       </div>
     </section>
   </div>
@@ -109,39 +113,10 @@ const categories = [
 </script>
 
 <style scoped>
-.shopping-page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 32px 20px 120px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.card {
-  background: var(--color-card);
-  border-radius: var(--radius-large);
-  padding: 28px;
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
-}
-
 .hero {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.eyebrow {
-  font-size: 12px;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-}
-
-.subtitle {
-  margin: 0;
-  color: var(--color-text-secondary);
 }
 
 .highlights {
@@ -165,15 +140,6 @@ const categories = [
   gap: 12px;
 }
 
-.generator button {
-  border: none;
-  padding: 10px 18px;
-  border-radius: var(--radius-medium);
-  background: linear-gradient(120deg, var(--color-accent), var(--color-accent-soft));
-  color: #fff;
-  cursor: pointer;
-}
-
 .generator-form {
   margin-top: 20px;
   display: grid;
@@ -188,14 +154,6 @@ const categories = [
   color: var(--color-text-secondary);
 }
 
-.generator-form input,
-.generator-form select {
-  border-radius: var(--radius-medium);
-  border: 1px solid var(--color-border);
-  padding: 12px;
-  background: var(--color-surface);
-}
-
 .list-preview header {
   margin-bottom: 16px;
 }
@@ -207,9 +165,6 @@ const categories = [
 }
 
 .category-card {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-medium);
-  padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -249,16 +204,6 @@ const categories = [
   color: var(--color-text-secondary);
 }
 
-.category-card button,
-.editor-actions button {
-  border: none;
-  border-radius: var(--radius-medium);
-  padding: 8px 14px;
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
-  cursor: pointer;
-}
-
 .editor {
   display: flex;
   flex-direction: column;
@@ -270,11 +215,6 @@ const categories = [
   flex-wrap: wrap;
   gap: 12px;
 }
-
-.editor-actions button {
-  background: var(--color-surface);
-}
-
 @media (min-width: 720px) {
   .hero {
     flex-direction: row;

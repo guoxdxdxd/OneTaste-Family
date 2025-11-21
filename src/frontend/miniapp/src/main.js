@@ -8,6 +8,8 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import './styles/theme.css'
+import './styles/base.css'
+import './styles/components.css'
 
 // 创建应用实例
 const app = createApp(App)
