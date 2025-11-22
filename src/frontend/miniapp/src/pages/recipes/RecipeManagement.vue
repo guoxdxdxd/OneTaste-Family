@@ -37,12 +37,9 @@
       </div>
       <div class="filter-group">
         <label>分类</label>
-        <select v-model="filters.category" class="form-control">
-          <option value="">全部</option>
-          <option v-for="cat in dishCategories" :key="cat.value" :value="cat.value">
-            {{ cat.label }}
-          </option>
-        </select>
+        <button type="button" class="form-control category-select-btn" @click="openCategoryPicker('filter')">
+          {{ getCategoryLabel(filters.category) || '全部' }}
+        </button>
       </div>
       <div class="filter-actions">
         <button type="button" class="btn btn-primary btn--full" @click="loadDishes(true)">筛选</button>
@@ -110,12 +107,9 @@
           </label>
           <label>
             <span>分类</span>
-            <select v-model="editorForm.category" class="form-control">
-              <option value="">未分类</option>
-              <option v-for="cat in dishCategories" :key="cat.value" :value="cat.value">
-                {{ cat.label }}
-              </option>
-            </select>
+            <button type="button" class="form-control category-select-btn" @click="openCategoryPicker('editor')">
+              {{ getCategoryLabel(editorForm.category) || '未分类' }}
+            </button>
           </label>
           <label>
             <span>描述</span>
@@ -160,6 +154,38 @@
         </form>
       </div>
     </div>
+
+    <!-- 底部滑入分类选择器 -->
+    <div v-if="categoryPickerVisible" class="bottom-sheet-overlay" @click="closeCategoryPicker">
+      <div class="bottom-sheet" @click.stop>
+        <div class="bottom-sheet-header">
+          <h3>选择分类</h3>
+          <button type="button" class="btn btn-ghost" @click="closeCategoryPicker">取消</button>
+        </div>
+        <div class="bottom-sheet-content">
+          <button
+            type="button"
+            class="category-option"
+            :class="{ active: currentPickerValue === '' }"
+            @click="selectCategory('')"
+          >
+            <span>{{ categoryPickerMode === 'filter' ? '全部' : '未分类' }}</span>
+            <span v-if="currentPickerValue === ''" class="check-icon">✓</span>
+          </button>
+          <button
+            v-for="cat in dishCategories"
+            :key="cat.value"
+            type="button"
+            class="category-option"
+            :class="{ active: currentPickerValue === cat.value }"
+            @click="selectCategory(cat.value)"
+          >
+            <span>{{ cat.label }}</span>
+            <span v-if="currentPickerValue === cat.value" class="check-icon">✓</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -200,6 +226,9 @@ const editorVisible = ref(false)
 const editorMode = ref('create')
 const editorError = ref('')
 const editorLoading = ref(false)
+const categoryPickerVisible = ref(false)
+const categoryPickerMode = ref('filter') // 'filter' or 'editor'
+const currentPickerValue = ref('')
 const editorForm = reactive({
   id: null,
   name: '',
@@ -383,6 +412,31 @@ const formatTime = (value) => {
   return date.toLocaleDateString()
 }
 
+const getCategoryLabel = (value) => {
+  if (!value) return ''
+  const cat = dishCategories.find((c) => c.value === value)
+  return cat ? cat.label : ''
+}
+
+const openCategoryPicker = (mode) => {
+  categoryPickerMode.value = mode
+  currentPickerValue.value = mode === 'filter' ? filters.category : editorForm.category
+  categoryPickerVisible.value = true
+}
+
+const closeCategoryPicker = () => {
+  categoryPickerVisible.value = false
+}
+
+const selectCategory = (value) => {
+  if (categoryPickerMode.value === 'filter') {
+    filters.category = value
+  } else {
+    editorForm.category = value
+  }
+  closeCategoryPicker()
+}
+
 onMounted(async () => {
   if (!familyStore.familyInfo) {
     await familyStore.fetchFamilyInfo()
@@ -535,5 +589,110 @@ onMounted(async () => {
 .error-text {
   color: #f44336;
   font-size: 13px;
+}
+
+.category-select-btn {
+  text-align: left;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  padding: 8px 12px;
+  border-radius: var(--radius-medium);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.category-select-btn:active {
+  background: #f5f5f5;
+}
+
+/* 底部滑入选择器 */
+.bottom-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.bottom-sheet {
+  width: 100%;
+  max-height: 70vh;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+.bottom-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.bottom-sheet-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.bottom-sheet-content {
+  padding: 8px 0;
+  overflow-y: auto;
+  max-height: calc(70vh - 60px);
+}
+
+.category-option {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #fff;
+  border: none;
+  text-align: left;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.category-option:active {
+  background: #f5f5f5;
+}
+
+.category-option.active {
+  color: var(--color-primary, #1976d2);
+  font-weight: 500;
+}
+
+.check-icon {
+  color: var(--color-primary, #1976d2);
+  font-weight: bold;
+  font-size: 18px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 </style>

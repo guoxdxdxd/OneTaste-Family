@@ -357,7 +357,7 @@ func (r *DishRepository) GetDishList(familyID string, page, pageSize int, catego
 	offsetPlaceholder := placeholder + 1
 
 	listQuery := fmt.Sprintf(`
-		SELECT id, name, category, image_url, created_at, updated_at
+		SELECT id, name, category, description, image_url, created_at, updated_at
 		FROM dishes
 		%s
 		ORDER BY created_at DESC
@@ -377,11 +377,13 @@ func (r *DishRepository) GetDishList(familyID string, page, pageSize int, catego
 	for rows.Next() {
 		item := &models.DishSummary{}
 		var category sql.NullString
+		var description sql.NullString
 		var image sql.NullString
 		if err := rows.Scan(
 			&item.DishID,
 			&item.Name,
 			&category,
+			&description,
 			&image,
 			&item.CreatedAt,
 			&item.UpdatedAt,
@@ -390,6 +392,7 @@ func (r *DishRepository) GetDishList(familyID string, page, pageSize int, catego
 		}
 
 		item.Category = nullableString(category)
+		item.Description = nullableString(description)
 		item.ImageURL = nullableString(image)
 		dishes = append(dishes, item)
 	}

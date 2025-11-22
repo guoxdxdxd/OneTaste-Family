@@ -137,12 +137,13 @@ type DishCreateResponse struct {
 
 // DishSummary 菜式列表项
 type DishSummary struct {
-	DishID    string    `json:"dish_id"`
-	Name      string    `json:"name"`
-	Category  string    `json:"category,omitempty"`
-	ImageURL  string    `json:"image_url,omitempty"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	DishID      string    `json:"dish_id"`
+	Name        string    `json:"name"`
+	Category    string    `json:"category,omitempty"`
+	Description string    `json:"description,omitempty"`
+	ImageURL    string    `json:"image_url,omitempty"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 // DishListResponse 菜式列表响应
