@@ -103,45 +103,61 @@
       <p v-if="!selectedList.length" class="empty">尚未选择食材，先从左侧列表添加。</p>
       <ul v-else class="selected-list">
         <li v-for="(item, index) in selectedList" :key="item.ingredient_id" class="selected-item">
-          <div class="selected-meta">
-            <strong>{{ item.ingredient_name || item.name }}</strong>
-            <small>{{ item.category || '未分类' }}</small>
+          <div
+            class="swipe-content"
+            :style="{ transform: `translateX(${swipeOffsets[item.ingredient_id] || 0}px)` }"
+            @touchstart="handleSwipeStart($event, item.ingredient_id)"
+            @touchmove="handleSwipeMove($event)"
+            @touchend="handleSwipeEnd"
+            @touchcancel="handleSwipeEnd"
+            @mousedown="handleSwipeStart($event, item.ingredient_id)"
+            @mousemove="handleSwipeMove($event)"
+            @mouseup="handleSwipeEnd"
+            @mouseleave="handleSwipeEnd"
+            @click.stop="handleSwipeTap(item.ingredient_id, $event)"
+          >
+            <div class="selected-meta">
+              <strong>{{ item.ingredient_name || item.name }}</strong>
+              <small>{{ item.category || '未分类' }}</small>
+            </div>
+            <div class="selected-inputs">
+              <label>
+                <span>数量</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  class="form-control"
+                  v-model.number="item.amount"
+                  @change="emitChange()"
+                />
+              </label>
+              <label>
+                <span>单位</span>
+                <input
+                  type="text"
+                  maxlength="10"
+                  class="form-control"
+                  v-model="item.unit"
+                  @change="emitChange()"
+                />
+              </label>
+              <label class="note-input">
+                <span>备注</span>
+                <input
+                  type="text"
+                  maxlength="50"
+                  class="form-control"
+                  v-model="item.notes"
+                  @change="emitChange()"
+                  placeholder="例如：切片/去籽"
+                />
+              </label>
+            </div>
           </div>
-          <div class="selected-inputs">
-            <label>
-              <span>数量</span>
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                class="form-control"
-                v-model.number="item.amount"
-                @change="emitChange()"
-              />
-            </label>
-            <label>
-              <span>单位</span>
-              <input
-                type="text"
-                maxlength="10"
-                class="form-control"
-                v-model="item.unit"
-                @change="emitChange()"
-              />
-            </label>
-            <label>
-              <span>备注</span>
-              <input
-                type="text"
-                maxlength="50"
-                class="form-control"
-                v-model="item.notes"
-                @change="emitChange()"
-                placeholder="例如：切片/去籽"
-              />
-            </label>
-            <button type="button" class="btn btn-ghost btn--sm" @click="removeIngredient(index)">移除</button>
-          </div>
+          <button type="button" class="swipe-delete" @click="removeIngredient(index)">
+            移除
+          </button>
         </li>
       </ul>
     </div>
@@ -296,10 +312,124 @@ const addIngredient = (item) => {
   emitChange()
 }
 
+const ACTION_WIDTH = 88
+const swipeOffsets = reactive({})
+const openItemId = ref(null)
+const swipeState = reactive({
+  startX: 0,
+  activeId: null,
+  initialOffset: 0,
+  isPointerDown: false
+})
+
+const clamp = (value, min, max) => {
+  return Math.min(max, Math.max(min, value))
+}
+
+const getPointX = (event) => {
+  if (event?.touches?.length) return event.touches[0].clientX
+  if (event?.changedTouches?.length) return event.changedTouches[0].clientX
+  return event?.clientX || 0
+}
+
+const isInteractiveTarget = (event) => {
+  const target = event?.target
+  if (!target) return false
+  return Boolean(target.closest('input, textarea, select, button'))
+}
+
+const closeSwipe = (id) => {
+  if (id === undefined || id === null) return
+  swipeOffsets[id] = 0
+  if (openItemId.value === id) {
+    openItemId.value = null
+  }
+}
+
+const handleSwipeStart = (event, id) => {
+  if (id === undefined || id === null) return
+  if (isInteractiveTarget(event)) return
+  swipeState.startX = getPointX(event)
+  swipeState.initialOffset = swipeOffsets[id] || 0
+  swipeState.activeId = id
+  swipeState.isPointerDown = true
+  if (
+    openItemId.value !== null &&
+    openItemId.value !== undefined &&
+    openItemId.value !== id
+  ) {
+    closeSwipe(openItemId.value)
+  }
+}
+
+const handleSwipeMove = (event) => {
+  if (!swipeState.isPointerDown || swipeState.activeId === null || swipeState.activeId === undefined)
+    return
+  if (event?.cancelable) {
+    event.preventDefault()
+  }
+  const currentX = getPointX(event)
+  const delta = currentX - swipeState.startX
+  const offset = clamp(swipeState.initialOffset + delta, -ACTION_WIDTH, 0)
+  swipeOffsets[swipeState.activeId] = offset
+}
+
+const handleSwipeEnd = () => {
+  if (swipeState.activeId === null || swipeState.activeId === undefined) return
+  const offset = swipeOffsets[swipeState.activeId] || 0
+  if (offset < -ACTION_WIDTH / 2) {
+    swipeOffsets[swipeState.activeId] = -ACTION_WIDTH
+    openItemId.value = swipeState.activeId
+  } else {
+    closeSwipe(swipeState.activeId)
+  }
+  swipeState.activeId = null
+  swipeState.isPointerDown = false
+  swipeState.startX = 0
+  swipeState.initialOffset = 0
+}
+
+const handleSwipeTap = (id, event) => {
+  if (id === undefined || id === null) return
+  if (isInteractiveTarget(event)) return
+  if (openItemId.value !== null && openItemId.value !== undefined && openItemId.value === id) {
+    closeSwipe(id)
+  } else if (
+    openItemId.value !== null &&
+    openItemId.value !== undefined &&
+    openItemId.value !== id
+  ) {
+    closeSwipe(openItemId.value)
+  }
+}
+
 const removeIngredient = (index) => {
-  selectedList.value.splice(index, 1)
+  const [removed] = selectedList.value.splice(index, 1)
+  if (removed?.ingredient_id !== undefined) {
+    delete swipeOffsets[removed.ingredient_id]
+    if (openItemId.value === removed.ingredient_id) {
+      openItemId.value = null
+    }
+  }
   emitChange()
 }
+
+watch(
+  selectedList,
+  (list) => {
+    const ids = new Set(list.map((item) => String(item.ingredient_id)))
+    Object.keys(swipeOffsets).forEach((id) => {
+      if (!ids.has(id)) {
+        delete swipeOffsets[id]
+      }
+    })
+    const openKey = openItemId.value !== null && openItemId.value !== undefined ? String(openItemId.value) : null
+    if (openKey && !ids.has(openKey)) {
+      openItemId.value = null
+    }
+  },
+  { deep: true }
+)
 
 loadCategory()
 </script>
@@ -379,12 +509,41 @@ loadCategory()
 }
 
 .selected-item {
+  position: relative;
+  border-radius: var(--radius-medium);
+  overflow: hidden;
+}
+
+.swipe-content {
+  position: relative;
+  width: 100%;
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-medium);
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  background: var(--color-surface);
+  transition: transform 0.2s ease;
+  z-index: 1;
+}
+
+.swipe-delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 88px;
+  border: none;
+  background: var(--color-danger);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 0;
 }
 
 .selected-inputs {
@@ -392,6 +551,10 @@ loadCategory()
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 8px;
   align-items: end;
+}
+
+.note-input {
+  grid-column: 1 / -1;
 }
 
 .selected-inputs label {
