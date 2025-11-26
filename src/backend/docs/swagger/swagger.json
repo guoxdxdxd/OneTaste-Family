@@ -1077,6 +1077,309 @@
                 }
             }
         },
+        "/menus": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "为某一天某一餐创建菜单，支持日期、餐次（早餐/午餐/晚餐）、菜式列表输入。同一日期同一餐次只能有一个菜单，可以覆盖已有菜单。需要Bearer Token认证。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "菜单"
+                ],
+                "summary": "创建菜单",
+                "parameters": [
+                    {
+                        "description": "创建菜单请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateMenuRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.MenuCreateResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误或业务限制",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "尚未加入家庭或菜式不存在",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/menus/daily": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取某一天的三餐菜单（早餐、午餐、晚餐）。需要Bearer Token认证。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "菜单"
+                ],
+                "summary": "获取每日菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "日期，格式：YYYY-MM-DD",
+                        "name": "date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.DailyMenuResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "尚未加入家庭",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/menus/weekly": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取从开始日期起一周的菜单列表。需要Bearer Token认证。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "菜单"
+                ],
+                "summary": "获取每周菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "开始日期，格式：YYYY-MM-DD",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.WeeklyMenuResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "尚未加入家庭",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/menus/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新已有菜单，支持添加菜式、删除菜式、修改日期或餐次。需要Bearer Token认证。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "菜单"
+                ],
+                "summary": "更新菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "菜单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新菜单请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateMenuRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.MenuUpdateResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误或业务限制",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "菜单或家庭不存在",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/user/info": {
             "get": {
                 "security": [
@@ -1255,6 +1558,52 @@
                 }
             }
         },
+        "models.CreateMenuRequest": {
+            "type": "object",
+            "required": [
+                "date",
+                "dish_ids",
+                "meal_type"
+            ],
+            "properties": {
+                "date": {
+                    "description": "日期，格式：YYYY-MM-DD",
+                    "type": "string"
+                },
+                "dish_ids": {
+                    "description": "菜式ID列表，至少1个",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "meal_type": {
+                    "description": "餐次",
+                    "type": "string",
+                    "enum": [
+                        "breakfast",
+                        "lunch",
+                        "dinner"
+                    ]
+                }
+            }
+        },
+        "models.DailyMenuResponse": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "menus": {
+                    "description": "三餐菜单（早餐、午餐、晚餐）",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MenuDetail"
+                    }
+                }
+            }
+        },
         "models.DishCreateResponse": {
             "type": "object",
             "properties": {
@@ -1346,6 +1695,9 @@
                     "type": "string"
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "description": {
                     "type": "string"
                 },
                 "dish_id": {
@@ -1564,7 +1916,9 @@
                     "type": "number"
                 },
                 "ingredient_id": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 26,
+                    "minLength": 1
                 },
                 "notes": {
                     "type": "string",
@@ -1684,6 +2038,102 @@
                 }
             }
         },
+        "models.MenuCreateResponse": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "dishes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DishSummary"
+                    }
+                },
+                "meal_type": {
+                    "type": "string"
+                },
+                "menu_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MenuDetail": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "date": {
+                    "description": "格式：YYYY-MM-DD",
+                    "type": "string"
+                },
+                "dishes": {
+                    "description": "菜式列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DishSummary"
+                    }
+                },
+                "family_id": {
+                    "type": "string"
+                },
+                "meal_type": {
+                    "description": "breakfast, lunch, dinner",
+                    "type": "string"
+                },
+                "menu_id": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MenuUpdateResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "date": {
+                    "description": "格式：YYYY-MM-DD",
+                    "type": "string"
+                },
+                "dishes": {
+                    "description": "菜式列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DishSummary"
+                    }
+                },
+                "family_id": {
+                    "type": "string"
+                },
+                "meal_type": {
+                    "description": "breakfast, lunch, dinner",
+                    "type": "string"
+                },
+                "menu_id": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "models.RegisterRequest": {
             "description": "用户注册请求参数",
             "type": "object",
@@ -1777,6 +2227,32 @@
                 }
             }
         },
+        "models.UpdateMenuRequest": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "description": "日期，格式：YYYY-MM-DD",
+                    "type": "string"
+                },
+                "dish_ids": {
+                    "description": "菜式ID列表",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "meal_type": {
+                    "description": "餐次",
+                    "type": "string",
+                    "enum": [
+                        "breakfast",
+                        "lunch",
+                        "dinner"
+                    ]
+                }
+            }
+        },
         "models.UserInfoResponse": {
             "description": "用户信息返回数据",
             "type": "object",
@@ -1808,6 +2284,24 @@
                     "description": "用户ID",
                     "type": "string",
                     "example": "01HZX1YF8Y6S7K4V9Q2J3M5N6P"
+                }
+            }
+        },
+        "models.WeeklyMenuResponse": {
+            "type": "object",
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "menus": {
+                    "description": "一周的菜单列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MenuDetail"
+                    }
+                },
+                "start_date": {
+                    "type": "string"
                 }
             }
         },

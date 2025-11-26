@@ -85,6 +85,39 @@ definitions:
     required:
     - name
     type: object
+  models.CreateMenuRequest:
+    properties:
+      date:
+        description: 日期，格式：YYYY-MM-DD
+        type: string
+      dish_ids:
+        description: 菜式ID列表，至少1个
+        items:
+          type: string
+        minItems: 1
+        type: array
+      meal_type:
+        description: 餐次
+        enum:
+        - breakfast
+        - lunch
+        - dinner
+        type: string
+    required:
+    - date
+    - dish_ids
+    - meal_type
+    type: object
+  models.DailyMenuResponse:
+    properties:
+      date:
+        type: string
+      menus:
+        description: 三餐菜单（早餐、午餐、晚餐）
+        items:
+          $ref: '#/definitions/models.MenuDetail'
+        type: array
+    type: object
   models.DishCreateResponse:
     properties:
       category:
@@ -145,6 +178,8 @@ definitions:
       category:
         type: string
       created_at:
+        type: string
+      description:
         type: string
       dish_id:
         type: string
@@ -294,6 +329,8 @@ definitions:
       amount:
         type: number
       ingredient_id:
+        maxLength: 26
+        minLength: 1
         type: string
       notes:
         maxLength: 255
@@ -383,6 +420,71 @@ definitions:
         example: free
         type: string
     type: object
+  models.MenuCreateResponse:
+    properties:
+      date:
+        type: string
+      dishes:
+        items:
+          $ref: '#/definitions/models.DishSummary'
+        type: array
+      meal_type:
+        type: string
+      menu_id:
+        type: string
+    type: object
+  models.MenuDetail:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: string
+      date:
+        description: 格式：YYYY-MM-DD
+        type: string
+      dishes:
+        description: 菜式列表
+        items:
+          $ref: '#/definitions/models.DishSummary'
+        type: array
+      family_id:
+        type: string
+      meal_type:
+        description: breakfast, lunch, dinner
+        type: string
+      menu_id:
+        type: string
+      source:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.MenuUpdateResponse:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: string
+      date:
+        description: 格式：YYYY-MM-DD
+        type: string
+      dishes:
+        description: 菜式列表
+        items:
+          $ref: '#/definitions/models.DishSummary'
+        type: array
+      family_id:
+        type: string
+      meal_type:
+        description: breakfast, lunch, dinner
+        type: string
+      menu_id:
+        type: string
+      source:
+        type: string
+      updated_at:
+        type: string
+    type: object
   models.RegisterRequest:
     description: 用户注册请求参数
     properties:
@@ -453,6 +555,25 @@ definitions:
     - name
     - steps
     type: object
+  models.UpdateMenuRequest:
+    properties:
+      date:
+        description: 日期，格式：YYYY-MM-DD
+        type: string
+      dish_ids:
+        description: 菜式ID列表
+        items:
+          type: string
+        minItems: 1
+        type: array
+      meal_type:
+        description: 餐次
+        enum:
+        - breakfast
+        - lunch
+        - dinner
+        type: string
+    type: object
   models.UserInfoResponse:
     description: 用户信息返回数据
     properties:
@@ -475,6 +596,18 @@ definitions:
       user_id:
         description: 用户ID
         example: 01HZX1YF8Y6S7K4V9Q2J3M5N6P
+        type: string
+    type: object
+  models.WeeklyMenuResponse:
+    properties:
+      end_date:
+        type: string
+      menus:
+        description: 一周的菜单列表
+        items:
+          $ref: '#/definitions/models.MenuDetail'
+        type: array
+      start_date:
         type: string
     type: object
   utils.FieldError:
@@ -1164,6 +1297,190 @@ paths:
       summary: 上传媒体文件
       tags:
       - 媒体
+  /menus:
+    post:
+      consumes:
+      - application/json
+      description: 为某一天某一餐创建菜单，支持日期、餐次（早餐/午餐/晚餐）、菜式列表输入。同一日期同一餐次只能有一个菜单，可以覆盖已有菜单。需要Bearer
+        Token认证。
+      parameters:
+      - description: 创建菜单请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMenuRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.MenuCreateResponse'
+              type: object
+        "400":
+          description: 参数错误或业务限制
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: 尚未加入家庭或菜式不存在
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 创建菜单
+      tags:
+      - 菜单
+  /menus/{id}:
+    put:
+      consumes:
+      - application/json
+      description: 更新已有菜单，支持添加菜式、删除菜式、修改日期或餐次。需要Bearer Token认证。
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新菜单请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateMenuRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.MenuUpdateResponse'
+              type: object
+        "400":
+          description: 参数错误或业务限制
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: 菜单或家庭不存在
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新菜单
+      tags:
+      - 菜单
+  /menus/daily:
+    get:
+      consumes:
+      - application/json
+      description: 获取某一天的三餐菜单（早餐、午餐、晚餐）。需要Bearer Token认证。
+      parameters:
+      - description: 日期，格式：YYYY-MM-DD
+        in: query
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DailyMenuResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: 尚未加入家庭
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取每日菜单
+      tags:
+      - 菜单
+  /menus/weekly:
+    get:
+      consumes:
+      - application/json
+      description: 获取从开始日期起一周的菜单列表。需要Bearer Token认证。
+      parameters:
+      - description: 开始日期，格式：YYYY-MM-DD
+        in: query
+        name: start_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.WeeklyMenuResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: 尚未加入家庭
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取每周菜单
+      tags:
+      - 菜单
   /user/info:
     get:
       consumes:

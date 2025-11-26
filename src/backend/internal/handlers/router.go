@@ -84,3 +84,17 @@ func RegisterMediaRoutes(api *gin.RouterGroup) {
 		media.POST("/upload", mediaHandler.UploadMedia)
 	}
 }
+
+// RegisterMenuRoutes 注册菜单相关路由
+func RegisterMenuRoutes(api *gin.RouterGroup) {
+	menuHandler := NewMenuHandler()
+
+	menus := api.Group("/menus")
+	menus.Use(middleware.AuthMiddleware())
+	{
+		menus.POST("", menuHandler.CreateMenu)
+		menus.GET("/daily", menuHandler.GetDailyMenu)
+		menus.GET("/weekly", menuHandler.GetWeeklyMenu)
+		menus.PUT("/:id", menuHandler.UpdateMenu)
+	}
+}
