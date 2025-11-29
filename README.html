@@ -1,0 +1,525 @@
+<!DOCTYPE html><html><head>
+      <title>README</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:////Users/guoxiongdi/.cursor/extensions/shd101wyy.markdown-preview-enhanced-0.8.19-universal/crossnote/dependencies/katex/katex.min.css">
+      
+      
+      
+      
+      
+      <style>
+      code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-family:Consolas,"Liberation Mono",Menlo,Courier,monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.4;-moz-tab-size:8;-o-tab-size:8;tab-size:8;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:.8em;overflow:auto;border-radius:3px;background:#f5f5f5}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal;background:#f5f5f5}.token.blockquote,.token.comment{color:#969896}.token.cdata{color:#183691}.token.doctype,.token.macro.property,.token.punctuation,.token.variable{color:#333}.token.builtin,.token.important,.token.keyword,.token.operator,.token.rule{color:#a71d5d}.token.attr-value,.token.regex,.token.string,.token.url{color:#183691}.token.atrule,.token.boolean,.token.code,.token.command,.token.constant,.token.entity,.token.number,.token.property,.token.symbol{color:#0086b3}.token.prolog,.token.selector,.token.tag{color:#63a35c}.token.attr-name,.token.class,.token.class-name,.token.function,.token.id,.token.namespace,.token.pseudo-class,.token.pseudo-element,.token.url-reference .token.variable{color:#795da3}.token.entity{cursor:help}.token.title,.token.title .token.punctuation{font-weight:700;color:#1d3e81}.token.list{color:#ed6a43}.token.inserted{background-color:#eaffea;color:#55a532}.token.deleted{background-color:#ffecec;color:#bd2c00}.token.bold{font-weight:700}.token.italic{font-style:italic}.language-json .token.property{color:#183691}.language-markup .token.tag .token.punctuation{color:#333}.language-css .token.function,code.language-css{color:#0086b3}.language-yaml .token.atrule{color:#63a35c}code.language-yaml{color:#183691}.language-ruby .token.function{color:#333}.language-markdown .token.url{color:#795da3}.language-makefile .token.symbol{color:#795da3}.language-makefile .token.variable{color:#183691}.language-makefile .token.builtin{color:#0086b3}.language-bash .token.keyword{color:#0086b3}pre[data-line]{position:relative;padding:1em 0 1em 3em}pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;display:block;width:100%}pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0));pointer-events:none;line-height:inherit;white-space:pre}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none;box-shadow:0 1px #fff}pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}html body{font-family:'Helvetica Neue',Helvetica,'Segoe UI',Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ol,html body>ul{margin-bottom:16px}html body ol,html body ul{padding-left:2em}html body ol.no-list,html body ul.no-list{padding:0;list-style-type:none}html body ol ol,html body ol ul,html body ul ol,html body ul ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:700;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::after,html body code::before{letter-spacing:-.2em;content:'\00a0'}html body pre>code{padding:0;margin:0;word-break:normal;white-space:pre;background:0 0;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:after,html body pre code:before,html body pre tt:after,html body pre tt:before{content:normal}html body blockquote,html body dl,html body ol,html body p,html body pre,html body ul{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body code,html body pre{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview ul{list-style:disc}.markdown-preview ul ul{list-style:circle}.markdown-preview ul ul ul{list-style:square}.markdown-preview ol{list-style:decimal}.markdown-preview ol ol,.markdown-preview ul ol{list-style-type:lower-roman}.markdown-preview ol ol ol,.markdown-preview ol ul ol,.markdown-preview ul ol ol,.markdown-preview ul ul ol{list-style-type:lower-alpha}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px / 2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+      <!-- The content below will be included at the end of the <head> element. --><script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    // your code here
+  });
+</script></head><body for="html-export">
+    
+    
+      <div class="crossnote markdown-preview  ">
+      
+<h1 id="onetaste-family-一家一味---项目文档">OneTaste Family 一家一味 - 项目文档 </h1>
+<h2 id="项目概述">项目概述 </h2>
+<h3 id="项目名称">项目名称 </h3>
+<p>OneTaste Family（一家一味）</p>
+<h3 id="项目背景">项目背景 </h3>
+<p>现代生活中，很多人面临选择困难症，每天不知道想吃什么、吃什么适合自己、对自己身体好。对于家庭主妇来说，买菜也是一个难题，需要买什么菜、买多少、可以存放多久等问题也困扰着大家。</p>
+<h3 id="项目目的">项目目的 </h3>
+<p>解决家庭日常生活中的核心问题：</p>
+<ul>
+<li><strong>吃什么</strong>：帮助用户决定每天想吃什么</li>
+<li><strong>应该吃什么</strong>：根据身体状况推荐合适的食物</li>
+<li><strong>买什么</strong>：根据菜单生成购物清单</li>
+<li><strong>买多少</strong>：合理规划食材采购数量</li>
+</ul>
+<h3 id="项目定位">项目定位 </h3>
+<p>面向家庭的智能食谱管理和购物助手系统，通过AI技术提供个性化的饮食建议和便捷的购物管理。</p>
+<hr>
+<h2 id="技术架构">技术架构 </h2>
+<h3 id="架构模式">架构模式 </h3>
+<p>BS架构（Browser/Server）</p>
+<h3 id="技术栈">技术栈 </h3>
+<ul>
+<li><strong>后端</strong>：Go语言</li>
+<li><strong>前端</strong>：Vue.js</li>
+<li><strong>AI服务</strong>：Python（大模型调用）</li>
+<li><strong>数据库</strong>：PostgreSQL</li>
+</ul>
+<h3 id="系统组成">系统组成 </h3>
+<ol>
+<li><strong>管理后台</strong>：用于系统管理和运营</li>
+<li><strong>用户小程序</strong>：面向家庭用户的移动端应用</li>
+<li><strong>AI服务</strong>：独立的Python服务，提供大模型能力</li>
+</ol>
+<hr>
+<h2 id="功能需求">功能需求 </h2>
+<h3 id="一-基础功能免费版">一、基础功能（免费版） </h3>
+<h4 id="1-家庭管理">1. 家庭管理 </h4>
+<ul>
+<li><strong>功能描述</strong>：用户组建成家庭</li>
+<li><strong>详细需求</strong>：
+<ul>
+<li>创建家庭</li>
+<li>邀请家庭成员加入</li>
+<li>家庭成员管理（添加、删除、角色设置）</li>
+<li>家庭信息管理</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-家庭食谱管理">2. 家庭食谱管理 </h4>
+<ul>
+<li><strong>功能描述</strong>：建立家庭食谱库</li>
+<li><strong>详细需求</strong>：
+<ul>
+<li>添加菜式（最多30个菜式）</li>
+<li>输入菜式名称</li>
+<li>输入对应食材（名称、数量、单位）</li>
+<li>输入烹饪步骤（支持文字和语音输入）</li>
+<li>编辑、删除菜式</li>
+<li>菜式分类管理</li>
+<li>支持语音输入转文字</li>
+</ul>
+</li>
+</ul>
+<h4 id="3-菜单规划">3. 菜单规划 </h4>
+<ul>
+<li><strong>功能描述</strong>：用户选择每天、每顿想吃什么，形成菜单</li>
+<li><strong>详细需求</strong>：
+<ul>
+<li>选择日期和餐次（早餐、午餐、晚餐）</li>
+<li>从家庭食谱中选择菜式</li>
+<li>生成每日菜单</li>
+<li>生成每周菜单</li>
+<li>菜单查看和编辑</li>
+<li>菜单分享给家庭成员</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-购物清单生成">4. 购物清单生成 </h4>
+<ul>
+<li><strong>功能描述</strong>：根据菜单对应的食材，生成购物清单</li>
+<li><strong>详细需求</strong>：
+<ul>
+<li>根据选择的菜单自动生成购物清单</li>
+<li>合并相同食材，计算总数量</li>
+<li>食材分类展示（蔬菜、肉类、调料等）</li>
+<li>购物清单编辑（增删改）</li>
+<li>购物清单标记（已购买、待购买）</li>
+<li>食材存放时间提醒</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="二-高阶功能付费版">二、高阶功能（付费版） </h3>
+<h4 id="0-扩展食谱容量">0. 扩展食谱容量 </h4>
+<ul>
+<li><strong>功能描述</strong>：增加家庭食谱数量上限</li>
+<li><strong>详细需求</strong>：
+<ul>
+<li>免费版：最多30个菜式</li>
+<li>付费版：最多60个菜式</li>
+</ul>
+</li>
+</ul>
+<h4 id="1-ai语音菜单整理">1. AI语音菜单整理 </h4>
+<ul>
+<li><strong>功能描述</strong>：语音输入菜单，AI大模型进行整理</li>
+<li><strong>详细需求</strong>：
+<ul>
+<li>支持语音输入菜式信息</li>
+<li>AI去除语气词</li>
+<li>AI修正逻辑不通、不顺的地方</li>
+<li>整理成规范的菜式格式</li>
+<li><strong>限制</strong>：一天10次</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-身体状况录入与分析">2. 身体状况录入与分析 </h4>
+<ul>
+<li><strong>功能描述</strong>：录入身体状况，AI分析用户身体状态</li>
+<li><strong>详细需求</strong>：
+<ul>
+<li>录入身体状况信息：
+<ul>
+<li>疾病信息（得了什么病）</li>
+<li>工作状态（最近忙不忙、压力大不大）</li>
+<li>身体感觉（身体什么感觉）</li>
+</ul>
+</li>
+<li>AI分析用户身体状态</li>
+<li>生成健康建议</li>
+<li><strong>限制</strong>：每天每人分析2次</li>
+</ul>
+</li>
+</ul>
+<h4 id="3-ai智能菜单生成">3. AI智能菜单生成 </h4>
+<ul>
+<li><strong>功能描述</strong>：AI根据用户身体状态分析生成菜单</li>
+<li><strong>详细需求</strong>：
+<ul>
+<li>基于用户身体状态</li>
+<li>结合家庭食谱库</li>
+<li>生成推荐菜单（每日/每周）</li>
+<li>说明推荐理由</li>
+<li><strong>限制</strong>：一周生成5次</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-ai菜单合理性分析">4. AI菜单合理性分析 </h4>
+<ul>
+<li><strong>功能描述</strong>：AI分析菜单是否合理</li>
+<li><strong>详细需求</strong>：
+<ul>
+<li>分析菜单营养搭配</li>
+<li>分析菜单是否适合身体状况</li>
+<li>提供优化建议</li>
+<li><strong>限制</strong>：一周5次</li>
+</ul>
+</li>
+</ul>
+<h4 id="5-ai烹饪步骤整合">5. AI烹饪步骤整合 </h4>
+<ul>
+<li><strong>功能描述</strong>：AI根据菜单里面各个菜式的烹饪步骤，整合成一顿饭的烹饪步骤</li>
+<li><strong>详细需求</strong>：
+<ul>
+<li>分析多道菜的烹饪步骤</li>
+<li>优化烹饪顺序</li>
+<li>整合成高效的烹饪流程</li>
+<li>提高做饭效率</li>
+<li>提供时间规划建议</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="系统模块设计">系统模块设计 </h2>
+<h3 id="1-用户模块">1. 用户模块 </h3>
+<ul>
+<li>用户注册/登录</li>
+<li>用户信息管理</li>
+<li>家庭成员管理</li>
+<li>权限管理</li>
+</ul>
+<h3 id="2-家庭模块">2. 家庭模块 </h3>
+<ul>
+<li>家庭创建</li>
+<li>家庭成员邀请</li>
+<li>家庭信息管理</li>
+<li>家庭设置</li>
+</ul>
+<h3 id="3-食谱模块">3. 食谱模块 </h3>
+<ul>
+<li>菜式管理（CRUD）</li>
+<li>食材管理</li>
+<li>烹饪步骤管理</li>
+<li>语音输入处理</li>
+<li>食谱分类</li>
+</ul>
+<h3 id="4-菜单模块">4. 菜单模块 </h3>
+<ul>
+<li>菜单创建</li>
+<li>菜单编辑</li>
+<li>菜单查看（日/周视图）</li>
+<li>菜单分享</li>
+</ul>
+<h3 id="5-购物清单模块">5. 购物清单模块 </h3>
+<ul>
+<li>清单生成</li>
+<li>清单编辑</li>
+<li>清单状态管理</li>
+<li>食材分类</li>
+</ul>
+<h3 id="6-ai服务模块">6. AI服务模块 </h3>
+<ul>
+<li>语音识别</li>
+<li>文本整理</li>
+<li>身体状况分析</li>
+<li>菜单生成</li>
+<li>菜单分析</li>
+<li>烹饪步骤优化</li>
+</ul>
+<h3 id="7-支付模块">7. 支付模块 </h3>
+<ul>
+<li>会员订阅</li>
+<li>支付管理</li>
+<li>会员权益管理</li>
+</ul>
+<h3 id="8-管理后台模块">8. 管理后台模块 </h3>
+<ul>
+<li>用户管理</li>
+<li>家庭管理</li>
+<li>数据统计</li>
+<li>系统配置</li>
+<li>内容审核</li>
+</ul>
+<hr>
+<h2 id="数据库设计概要">数据库设计（概要） </h2>
+<h3 id="核心表结构">核心表结构 </h3>
+<h4 id="用户表users">用户表（users） </h4>
+<ul>
+<li>用户ID、用户名、手机号、密码、创建时间等</li>
+</ul>
+<h4 id="家庭表families">家庭表（families） </h4>
+<ul>
+<li>家庭ID、家庭名称、创建人、创建时间等</li>
+</ul>
+<h4 id="家庭成员表family_members">家庭成员表（family_members） </h4>
+<ul>
+<li>成员ID、家庭ID、用户ID、角色、加入时间等</li>
+</ul>
+<h4 id="菜式表dishes">菜式表（dishes） </h4>
+<ul>
+<li>菜式ID、家庭ID、菜式名称、分类、创建时间等</li>
+</ul>
+<h4 id="食材表ingredients">食材表（ingredients） </h4>
+<ul>
+<li>食材ID、菜式ID、食材名称、数量、单位等</li>
+</ul>
+<h4 id="烹饪步骤表cooking_steps">烹饪步骤表（cooking_steps） </h4>
+<ul>
+<li>步骤ID、菜式ID、步骤序号、步骤内容等</li>
+</ul>
+<h4 id="菜单表menus">菜单表（menus） </h4>
+<ul>
+<li>菜单ID、家庭ID、日期、餐次、创建人、创建时间等</li>
+</ul>
+<h4 id="菜单菜式关联表menu_dishes">菜单菜式关联表（menu_dishes） </h4>
+<ul>
+<li>关联ID、菜单ID、菜式ID等</li>
+</ul>
+<h4 id="购物清单表shopping_lists">购物清单表（shopping_lists） </h4>
+<ul>
+<li>清单ID、家庭ID、生成日期、状态等</li>
+</ul>
+<h4 id="购物清单项表shopping_list_items">购物清单项表（shopping_list_items） </h4>
+<ul>
+<li>项ID、清单ID、食材名称、数量、单位、状态等</li>
+</ul>
+<h4 id="身体状况记录表health_records">身体状况记录表（health_records） </h4>
+<ul>
+<li>记录ID、用户ID、记录内容、分析结果、记录时间等</li>
+</ul>
+<h4 id="会员表memberships">会员表（memberships） </h4>
+<ul>
+<li>会员ID、用户ID、家庭ID、会员类型、到期时间等</li>
+</ul>
+<h4 id="ai调用记录表ai_usage_logs">AI调用记录表（ai_usage_logs） </h4>
+<ul>
+<li>记录ID、用户ID、调用类型、调用时间、剩余次数等</li>
+</ul>
+<hr>
+<h2 id="api设计概要">API设计（概要） </h2>
+<h3 id="用户相关">用户相关 </h3>
+<ul>
+<li><code>POST /api/v1/auth/register</code> - 用户注册</li>
+<li><code>POST /api/v1/auth/login</code> - 用户登录</li>
+<li><code>GET /api/v1/user/info</code> - 获取用户信息</li>
+<li><code>PUT /api/v1/user/info</code> - 更新用户信息</li>
+</ul>
+<h3 id="家庭相关">家庭相关 </h3>
+<ul>
+<li><code>POST /api/v1/family/create</code> - 创建家庭</li>
+<li><code>GET /api/v1/family/info</code> - 获取家庭信息</li>
+<li><code>POST /api/v1/family/member/invite</code> - 邀请成员</li>
+<li><code>GET /api/v1/family/members</code> - 获取家庭成员列表</li>
+</ul>
+<h3 id="食谱相关">食谱相关 </h3>
+<ul>
+<li><code>POST /api/v1/dishes</code> - 创建菜式</li>
+<li><code>GET /api/v1/dishes</code> - 获取菜式列表</li>
+<li><code>GET /api/v1/dishes/{id}</code> - 获取菜式详情</li>
+<li><code>PUT /api/v1/dishes/{id}</code> - 更新菜式</li>
+<li><code>DELETE /api/v1/dishes/{id}</code> - 删除菜式</li>
+<li><code>POST /api/v1/dishes/voice-input</code> - 语音输入菜式（付费）</li>
+</ul>
+<h3 id="菜单相关">菜单相关 </h3>
+<ul>
+<li><code>POST /api/v1/menus</code> - 创建菜单</li>
+<li><code>GET /api/v1/menus/daily</code> - 获取每日菜单</li>
+<li><code>GET /api/v1/menus/weekly</code> - 获取每周菜单</li>
+<li><code>PUT /api/v1/menus/{id}</code> - 更新菜单</li>
+<li><code>POST /api/v1/menus/ai-generate</code> - AI生成菜单（付费）</li>
+<li><code>POST /api/v1/menus/ai-analyze</code> - AI分析菜单（付费）</li>
+</ul>
+<h3 id="购物清单相关">购物清单相关 </h3>
+<ul>
+<li><code>POST /api/v1/shopping-lists/generate</code> - 生成购物清单</li>
+<li><code>GET /api/v1/shopping-lists/{id}</code> - 获取购物清单</li>
+<li><code>PUT /api/v1/shopping-lists/{id}</code> - 更新购物清单</li>
+<li><code>POST /api/v1/shopping-lists/{id}/items/{itemId}/toggle</code> - 切换购物项状态</li>
+</ul>
+<h3 id="身体状况相关付费">身体状况相关（付费） </h3>
+<ul>
+<li><code>POST /api/v1/health/record</code> - 录入身体状况</li>
+<li><code>POST /api/v1/health/analyze</code> - AI分析身体状况</li>
+<li><code>GET /api/v1/health/records</code> - 获取身体状况记录</li>
+</ul>
+<h3 id="烹饪步骤相关付费">烹饪步骤相关（付费） </h3>
+<ul>
+<li><code>POST /api/v1/cooking/optimize</code> - AI优化烹饪步骤</li>
+</ul>
+<h3 id="支付相关">支付相关 </h3>
+<ul>
+<li><code>POST /api/v1/payment/subscribe</code> - 订阅会员</li>
+<li><code>GET /api/v1/payment/membership</code> - 获取会员信息</li>
+</ul>
+<hr>
+<h2 id="开发计划">开发计划 </h2>
+<h3 id="第一阶段基础功能开发mvp">第一阶段：基础功能开发（MVP） </h3>
+<ol>
+<li>用户注册登录</li>
+<li>家庭管理</li>
+<li>食谱管理（基础版）</li>
+<li>菜单规划</li>
+<li>购物清单生成</li>
+</ol>
+<h3 id="第二阶段功能完善">第二阶段：功能完善 </h3>
+<ol>
+<li>语音输入功能</li>
+<li>管理后台开发</li>
+<li>小程序开发</li>
+<li>系统优化</li>
+</ol>
+<h3 id="第三阶段ai功能开发">第三阶段：AI功能开发 </h3>
+<ol>
+<li>AI服务搭建</li>
+<li>语音整理功能</li>
+<li>身体状况分析</li>
+<li>智能菜单生成</li>
+<li>菜单分析</li>
+<li>烹饪步骤优化</li>
+</ol>
+<h3 id="第四阶段付费功能与运营">第四阶段：付费功能与运营 </h3>
+<ol>
+<li>支付系统集成</li>
+<li>会员系统</li>
+<li>数据统计</li>
+<li>运营工具</li>
+</ol>
+<hr>
+<h2 id="技术实现要点">技术实现要点 </h2>
+<h3 id="后端go">后端（Go） </h3>
+<ul>
+<li>使用Gin或Echo框架</li>
+<li>JWT认证</li>
+<li>数据库ORM（GORM）</li>
+<li>文件上传处理</li>
+<li>接口限流</li>
+</ul>
+<h3 id="前端vue">前端（Vue） </h3>
+<ul>
+<li>Vue 3 + TypeScript</li>
+<li>组件化开发</li>
+<li>状态管理（Vuex/Pinia）</li>
+<li>UI框架（Element Plus / Vant）</li>
+</ul>
+<h3 id="ai服务python">AI服务（Python） </h3>
+<ul>
+<li>Flask/FastAPI框架</li>
+<li>大模型API调用（OpenAI/文心一言/通义千问等）</li>
+<li>语音识别（百度/讯飞等）</li>
+<li>异步处理</li>
+</ul>
+<h3 id="小程序">小程序 </h3>
+<ul>
+<li>微信小程序开发</li>
+<li>语音输入API</li>
+<li>分享功能</li>
+</ul>
+<hr>
+<h2 id="项目文件结构">项目文件结构 </h2>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>OneTasteFamily/
+├── README.md                 # 项目文档
+├── backend/                  # Go后端
+│   ├── cmd/
+│   ├── internal/
+│   ├── pkg/
+│   └── api/
+├── frontend/                 # Vue前端
+│   ├── admin/               # 管理后台
+│   └── miniapp/             # 小程序
+├── ai-service/              # Python AI服务
+│   ├── app/
+│   ├── models/
+│   └── utils/
+├── docs/                    # 文档目录
+│   ├── api.md              # API文档
+│   ├── database.md         # 数据库设计
+│   ├── deployment.md       # 部署文档
+│   └── DOCKER_DEPLOYMENT.md # Docker部署文档
+├── docker/                  # Docker配置
+│   ├── docker-compose.yml  # Docker Compose配置
+│   ├── backup_postgres.sh  # PostgreSQL备份脚本
+│   ├── backup_redis.sh     # Redis备份脚本
+│   └── README.md           # Docker快速指南
+└── data/                    # 数据目录（自动创建）
+    ├── postgres/           # PostgreSQL数据
+    └── redis/              # Redis数据
+</code></pre><hr>
+<h2 id="快速开始docker-部署">快速开始（Docker 部署） </h2>
+<h3 id="数据库服务部署">数据库服务部署 </h3>
+<p>使用 Docker 快速部署 PostgreSQL 和 Redis：</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># 1. 进入 docker 目录</span>
+<span class="token builtin class-name">cd</span> <span class="token function">docker</span>
+
+<span class="token comment"># 2. 初始化环境</span>
+<span class="token function">chmod</span> +x init.sh
+./init.sh
+
+<span class="token comment"># 3. 编辑环境变量（设置强密码）</span>
+<span class="token function">nano</span> .env
+
+<span class="token comment"># 4. 启动服务</span>
+<span class="token function">docker-compose</span> up <span class="token parameter variable">-d</span>
+
+<span class="token comment"># 5. 验证服务</span>
+<span class="token function">docker-compose</span> <span class="token function">ps</span>
+</code></pre><p>详细文档请参考：</p>
+<ul>
+<li><a href="./docs/DOCKER_DEPLOYMENT.md">Docker 部署文档</a> - 包含 Ubuntu 22.04 特定配置</li>
+<li><a href="./docs/UBUNTU_SETUP.md">Ubuntu 22.04 系统配置指南</a> - 系统级配置和优化</li>
+<li><a href="./docker/README.md">Docker 快速指南</a></li>
+</ul>
+<hr>
+<h2 id="后续规划">后续规划 </h2>
+<ol>
+<li><strong>数据统计</strong>：分析用户饮食习惯，提供数据报告</li>
+<li><strong>社区功能</strong>：分享菜谱，用户互动</li>
+<li><strong>营养分析</strong>：详细的营养成分分析</li>
+<li><strong>智能推荐</strong>：基于历史数据的个性化推荐</li>
+<li><strong>多端支持</strong>：Web、iOS、Android全平台</li>
+</ol>
+<hr>
+<h2 id="注意事项">注意事项 </h2>
+<ol>
+<li><strong>数据安全</strong>：用户隐私数据需要加密存储</li>
+<li><strong>AI调用成本</strong>：需要控制AI调用频率，避免成本过高</li>
+<li><strong>性能优化</strong>：购物清单生成等计算密集型操作需要优化</li>
+<li><strong>用户体验</strong>：语音输入、AI分析等功能的响应时间需要优化</li>
+<li><strong>内容审核</strong>：用户输入的菜谱内容需要审核机制</li>
+</ol>
+<hr>
+<h2 id="联系方式">联系方式 </h2>
+<p>项目负责人：[待填写]<br>
+开发团队：[待填写]<br>
+项目开始时间：[待填写]</p>
+<hr>
+<p><em>本文档版本：v1.0</em><br>
+<em>最后更新时间：[当前日期]</em></p>
+
+      </div>
+      
+      
+    
+    
+    
+    
+    
+    
+  
+    </body></html>
