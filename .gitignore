@@ -85,3 +85,5 @@ src/ai-service/venv/
 
 # Swagger 生成的文档（可选，如果不想提交生成的文档）
 # src/backend/docs/swagger/
+
+__debug_bin*
