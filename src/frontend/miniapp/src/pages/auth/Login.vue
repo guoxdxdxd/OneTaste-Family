@@ -1,69 +1,110 @@
 <template>
   <div class="auth-page">
-    <div class="auth-card card">
-      <header class="card-header">
-        <p class="eyebrow">一家一味 · 登录</p>
-        <h1>欢迎回来</h1>
-        <p class="description">同步家庭口味与计划，让日常三餐少一些纠结，多一份安定。</p>
+    <!-- 装饰背景 -->
+    <div class="auth-page__bg">
+      <div class="auth-page__bg-circle auth-page__bg-circle--1"></div>
+      <div class="auth-page__bg-circle auth-page__bg-circle--2"></div>
+    </div>
+
+    <div class="auth-page__content">
+      <!-- 品牌区域 -->
+      <header class="auth-header">
+        <div class="auth-header__logo">
+          <span class="auth-header__logo-icon">🍳</span>
+        </div>
+        <h1 class="auth-header__title">一家一味</h1>
+        <p class="auth-header__subtitle">记录家人口味，规划温暖三餐</p>
       </header>
 
-      <ul class="comfort-list">
-        <li v-for="item in comfortNotes" :key="item">{{ item }}</li>
-      </ul>
-
-      <form @submit.prevent="handleLogin" class="auth-form">
-        <div class="form-group">
-          <label for="phone">手机号</label>
-          <input
-            id="phone"
-            v-model="form.phone"
-            type="tel"
-            :class="['form-control', { error: errors.phone }]"
-            placeholder="请输入手机号"
-            maxlength="11"
-            @blur="validatePhone"
-            @input="clearError('phone')"
-          />
-          <span v-if="errors.phone" class="error-message">{{ errors.phone }}</span>
+      <!-- 登录表单卡片 -->
+      <div class="auth-card">
+        <div class="auth-card__header">
+          <h2 class="auth-card__title">欢迎回来</h2>
+          <p class="auth-card__desc">登录后同步家庭数据与菜单计划</p>
         </div>
 
-        <div class="form-group">
-          <label for="password">密码</label>
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            :class="['form-control', { error: errors.password }]"
-            placeholder="请输入密码"
-            @blur="validatePassword"
-            @input="clearError('password')"
-          />
-          <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
-        </div>
+        <form @submit.prevent="handleLogin" class="auth-form">
+          <!-- 手机号 -->
+          <div class="form-group">
+            <label class="form-label" for="phone">手机号</label>
+            <input
+              id="phone"
+              v-model="form.phone"
+              type="tel"
+              class="input"
+              :class="{ 'input--error': errors.phone }"
+              placeholder="请输入手机号"
+              maxlength="11"
+              autocomplete="tel"
+              @blur="validatePhone"
+              @input="clearError('phone')"
+            />
+            <span v-if="errors.phone" class="form-error">{{ errors.phone }}</span>
+          </div>
 
-        <div v-if="errorMessage" class="error-alert">
-          {{ errorMessage }}
-        </div>
+          <!-- 密码 -->
+          <div class="form-group">
+            <label class="form-label" for="password">密码</label>
+            <input
+              id="password"
+              v-model="form.password"
+              type="password"
+              class="input"
+              :class="{ 'input--error': errors.password }"
+              placeholder="请输入密码"
+              autocomplete="current-password"
+              @blur="validatePassword"
+              @input="clearError('password')"
+            />
+            <span v-if="errors.password" class="form-error">{{ errors.password }}</span>
+          </div>
 
-        <button type="submit" class="btn btn-gradient btn--full" :disabled="loading">
-          <span v-if="loading">登录中...</span>
-          <span v-else>进入家庭空间</span>
-        </button>
-      </form>
+          <!-- 错误提示 -->
+          <div v-if="errorMessage" class="auth-alert auth-alert--error">
+            <IconClose class="auth-alert__icon" />
+            <span>{{ errorMessage }}</span>
+          </div>
 
-      <footer class="card-footer">
-        <span>还没有账号？</span>
-        <router-link to="/register">创建家庭账户</router-link>
-      </footer>
+          <!-- 提交按钮 -->
+          <button 
+            type="submit" 
+            class="btn btn--primary btn--lg btn--full" 
+            :disabled="loading"
+          >
+            <span v-if="loading" class="loading-spinner loading-spinner--sm"></span>
+            <span>{{ loading ? '登录中...' : '登录' }}</span>
+          </button>
+        </form>
+
+        <!-- 底部链接 -->
+        <footer class="auth-card__footer">
+          <span>还没有账号？</span>
+          <router-link to="/register" class="auth-link">立即注册</router-link>
+        </footer>
+      </div>
+
+      <!-- 底部说明 -->
+      <div class="auth-footer">
+        <p>登录即表示同意 <a href="#">服务协议</a> 和 <a href="#">隐私政策</a></p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
+/**
+ * 登录页面
+ * 
+ * 功能：
+ * - 手机号密码登录
+ * - 表单验证
+ * - 登录状态管理
+ */
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { getPhoneError, getPasswordError } from '@/utils/validate'
+import IconClose from '@/components/icons/IconClose.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -83,11 +124,6 @@ const errors = reactive({
 
 const errorMessage = ref('')
 const loading = ref(false)
-const comfortNotes = [
-  '记录家人的口味喜好',
-  '同步菜单与采购提醒',
-  '守护家庭的健康节奏'
-]
 
 // 验证手机号
 const validatePhone = () => {
@@ -137,7 +173,7 @@ const handleLogin = async () => {
     const redirect = route.query.redirect || '/'
     router.push(redirect)
   } catch (error) {
-    errorMessage.value = error.message || '登录失败，请稍后重试'
+    errorMessage.value = error.message || '登录失败，请检查账号密码'
   } finally {
     loading.value = false
   }
@@ -147,107 +183,214 @@ const handleLogin = async () => {
 <style scoped>
 .auth-page {
   min-height: 100vh;
-  padding: 40px 20px 60px;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-base);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 装饰背景 */
+.auth-page__bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.auth-page__bg-circle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.6;
+}
+
+.auth-page__bg-circle--1 {
+  width: 300px;
+  height: 300px;
+  background: var(--color-primary-200);
+  top: -100px;
+  right: -100px;
+}
+
+.auth-page__bg-circle--2 {
+  width: 200px;
+  height: 200px;
+  background: var(--color-secondary-200);
+  bottom: 10%;
+  left: -60px;
+}
+
+/* 内容区域 */
+.auth-page__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-5);
+  position: relative;
+  z-index: 1;
+}
+
+/* 品牌区域 */
+.auth-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+  animation: slideInDown var(--duration-slow) var(--ease-out);
+}
+
+.auth-header__logo {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto var(--space-4);
+  background: var(--gradient-primary);
+  border-radius: var(--radius-2xl);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: var(--shadow-lg);
 }
 
+.auth-header__logo-icon {
+  font-size: 36px;
+}
+
+.auth-header__title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-heading);
+  margin: 0 0 var(--space-2);
+  letter-spacing: 0.05em;
+}
+
+.auth-header__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* 表单卡片 */
 .auth-card {
   width: 100%;
-  max-width: 420px;
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  max-width: 380px;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-xl);
+  animation: slideInUp var(--duration-slow) var(--ease-out);
+  animation-delay: 100ms;
+  animation-fill-mode: both;
 }
 
-.card-header .eyebrow {
-  font-size: 12px;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  margin: 0 0 12px;
+.auth-card__header {
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.auth-card__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-heading);
+  margin: 0 0 var(--space-2);
+}
+
+.auth-card__desc {
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-}
-
-.card-header h1 {
-  margin: 0 0 8px;
-  font-size: 30px;
-  color: var(--color-text-primary);
-}
-
-.card-header .description {
   margin: 0;
-  color: var(--color-text-secondary);
-  font-size: 15px;
-  line-height: 1.6;
 }
 
-.comfort-list {
-  list-style: none;
-  margin: 0;
-  padding: 14px 18px;
-  border-radius: var(--radius-medium);
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.comfort-list li::before {
-  content: '•';
-  color: var(--color-accent);
-  margin-right: 8px;
-}
-
+/* 表单 */
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: var(--space-5);
 }
 
-.form-group {
+.auth-form .form-group {
+  animation: fadeIn var(--duration-normal) var(--ease-out);
+  animation-fill-mode: both;
+}
+
+.auth-form .form-group:nth-child(1) {
+  animation-delay: 200ms;
+}
+
+.auth-form .form-group:nth-child(2) {
+  animation-delay: 300ms;
+}
+
+/* 错误提示框 */
+.auth-alert {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  animation: scaleIn var(--duration-fast) var(--ease-spring);
 }
 
-.form-group label {
-  font-size: 14px;
-  color: var(--color-text-primary);
+.auth-alert--error {
+  background: var(--color-danger-50);
+  color: var(--color-danger-600);
+  border: 1px solid var(--color-danger-100);
 }
 
-.error-message {
-  font-size: 12px;
-  color: #c44536;
+.auth-alert__icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
-.error-alert {
-  padding: 12px 14px;
-  border-radius: var(--radius-small);
-  background: #ffe7e1;
-  color: #a3412b;
-  font-size: 14px;
-  border: 1px solid #ffd3c7;
-}
-
-.card-footer {
+/* 卡片底部 */
+.auth-card__footer {
   display: flex;
-  gap: 6px;
-  font-size: 14px;
-  color: var(--color-text-secondary);
+  align-items: center;
   justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-light);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
 }
 
-.card-footer a {
-  font-weight: 600;
+.auth-link {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
 }
 
-@media (max-width: 480px) {
-  .auth-card {
-    padding: 24px;
-  }
+.auth-link:hover {
+  color: var(--color-primary-dark);
+}
+
+/* 页面底部 */
+.auth-footer {
+  margin-top: var(--space-8);
+  text-align: center;
+  animation: fadeIn var(--duration-slow) var(--ease-out);
+  animation-delay: 400ms;
+  animation-fill-mode: both;
+}
+
+.auth-footer p {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.auth-footer a {
+  color: var(--color-text-secondary);
+}
+
+.auth-footer a:hover {
+  color: var(--color-primary);
+}
+
+/* 按钮加载状态 */
+.btn .loading-spinner {
+  margin-right: var(--space-2);
 }
 </style>

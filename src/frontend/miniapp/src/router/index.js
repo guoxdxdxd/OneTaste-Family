@@ -38,6 +38,42 @@ const routes = [
         }
       },
       {
+        path: 'menus/create',
+        name: 'CreateMenu',
+        component: () => import('@/pages/menu/CreateMenu.vue'),
+        meta: {
+          requiresAuth: true,
+          title: '创建菜单'
+        }
+      },
+      {
+        path: 'menus/daily',
+        name: 'DailyMenu',
+        component: () => import('@/pages/menu/DailyMenu.vue'),
+        meta: {
+          requiresAuth: true,
+          title: '每日菜单'
+        }
+      },
+      {
+        path: 'menus/weekly',
+        name: 'WeeklyMenu',
+        component: () => import('@/pages/menu/WeeklyMenu.vue'),
+        meta: {
+          requiresAuth: true,
+          title: '每周菜单'
+        }
+      },
+      {
+        path: 'menus/:id/edit',
+        name: 'EditMenu',
+        component: () => import('@/pages/menu/EditMenu.vue'),
+        meta: {
+          requiresAuth: true,
+          title: '编辑菜单'
+        }
+      },
+      {
         path: 'shopping',
         name: 'Shopping',
         component: () => import('@/pages/shopping/ShoppingHub.vue'),

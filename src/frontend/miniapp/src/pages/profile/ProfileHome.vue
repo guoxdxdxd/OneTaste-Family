@@ -1,317 +1,310 @@
 <template>
-  <div class="profile-page page">
-    <section class="card hero">
-      <div>
-        <p class="eyebrow">我的家庭空间</p>
-        <h1>{{ greeting }}</h1>
-        <p class="subtitle">
-          管理家庭资料、邀请成员与权限，一次配置即可串联菜单、食谱与购物清单。
-        </p>
-      </div>
-      <div class="hero-tags">
-        <span>账号：{{ userStore.phone || '未设置' }}</span>
-        <span>会员：{{ membershipCopy }}</span>
-      </div>
-    </section>
-
-    <section class="card summary">
-      <article>
-        <p class="label">个人昵称</p>
-        <h3>{{ userStore.nickname || '待完善' }}</h3>
-        <p class="desc">昵称会出现在二维码邀请与成员列表中。</p>
-      </article>
-      <article>
-        <p class="label">家庭状态</p>
-        <h3>{{ familyStore.hasFamily ? '已加入' : '未创建' }}</h3>
-        <p class="desc">{{ familyStore.hasFamily ? familyStore.familyName : '请先创建或接受邀请' }}</p>
-      </article>
-      <article>
-        <p class="label">角色</p>
-        <h3>{{ roleCopy }}</h3>
-        <p class="desc">{{ roleDesc }}</p>
-      </article>
-    </section>
-
-    <section v-if="showCreate" class="card create-card">
-      <header>
-        <div>
-          <h2>创建家庭</h2>
-          <p>每位用户仅能创建或加入一个家庭，请谨慎填写名称。</p>
+  <div class="page profile-page">
+    <!-- 用户信息卡片 -->
+    <section class="user-card">
+      <div class="user-card__main">
+        <div class="avatar avatar--xl">
+          {{ userInitial }}
         </div>
-        <button
-          type="button"
-          class="btn btn-ghost btn--sm"
-          @click="refreshInfo"
-          :disabled="familyStore.infoLoading"
-        >
-          {{ familyStore.infoLoading ? '同步中...' : '刷新状态' }}
-        </button>
-      </header>
+        <div class="user-card__info">
+          <h1 class="user-card__name">{{ userStore.nickname || '未设置昵称' }}</h1>
+          <p class="user-card__phone">{{ userStore.phone || '未绑定手机' }}</p>
+        </div>
+      </div>
+      <div class="user-card__meta">
+        <div class="user-card__tag">
+          <span class="tag tag--primary tag--pill">{{ membershipLabel }}</span>
+        </div>
+      </div>
+    </section>
 
-      <form @submit.prevent="handleCreate" class="create-form">
-        <label>
-          <span>家庭名称</span>
+    <!-- 家庭状态 -->
+    <section v-if="!familyStore.hasFamily" class="family-create card">
+      <div class="family-create__header">
+        <IconFamily class="family-create__icon" />
+        <div>
+          <h2 class="family-create__title">创建你的家庭</h2>
+          <p class="family-create__desc">创建家庭后可邀请家人一起管理菜单</p>
+        </div>
+      </div>
+
+      <form @submit.prevent="handleCreateFamily" class="family-create__form">
+        <div class="form-group">
+          <label class="form-label">家庭名称</label>
           <input
             v-model="createForm.name"
             type="text"
-            :class="['form-control', { error: createErrors.name }]"
+            class="input"
+            :class="{ 'input--error': createErrors.name }"
+            placeholder="例如：温馨小家"
             maxlength="20"
-            placeholder="例如：张家的厨房"
           />
-          <small v-if="createErrors.name" class="error-text">{{ createErrors.name }}</small>
-        </label>
-        <label>
-          <span>家庭描述（可选）</span>
+          <span v-if="createErrors.name" class="form-error">{{ createErrors.name }}</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">家庭描述 <span class="form-hint">（选填）</span></label>
           <textarea
             v-model="createForm.description"
-            class="form-control"
+            class="textarea"
+            placeholder="给家庭写一段温馨的介绍"
             maxlength="100"
-            placeholder="给家人一段温柔介绍"
+            rows="2"
           />
-        </label>
-        <p v-if="feedback" class="feedback" :class="{ error: feedbackType === 'error', success: feedbackType === 'success' }">{{ feedback }}</p>
-        <button type="submit" class="btn btn-primary btn--full" :disabled="familyStore.createLoading">
+        </div>
+
+        <button 
+          type="submit" 
+          class="btn btn--primary btn--full" 
+          :disabled="familyStore.createLoading"
+        >
           {{ familyStore.createLoading ? '创建中...' : '创建家庭' }}
         </button>
       </form>
     </section>
 
-    <section v-else class="family-grid">
-      <article class="card family-info">
-        <header>
-          <div>
-            <p class="label">家庭名称</p>
-            <h2>{{ familyStore.familyName }}</h2>
-          </div>
-          <button
-            type="button"
-            class="btn btn-ghost btn--sm"
-            @click="refreshInfo"
-            :disabled="familyStore.infoLoading"
-          >
-            {{ familyStore.infoLoading ? '同步中...' : '刷新信息' }}
-          </button>
-        </header>
-        <p class="desc">{{ familyStore.familyInfo?.description || '还没有简介，快去补充一段温馨的话吧。' }}</p>
-        <dl class="info-stats">
-          <div>
-            <dt>成员数量</dt>
-            <dd>{{ familyStore.memberCount }} / {{ familyStore.familyInfo?.member_limit || 10 }}</dd>
-          </div>
-          <div>
-            <dt>菜式数量</dt>
-            <dd>{{ familyStore.familyInfo?.dish_count || 0 }} / {{ familyStore.familyInfo?.max_dishes || 30 }}</dd>
-          </div>
-          <div>
-            <dt>身份</dt>
-            <dd>{{ roleCopy }}</dd>
-          </div>
-        </dl>
-      </article>
-
-      <article class="card recipes-card">
-        <header>
-          <div>
-            <h2>菜谱管理</h2>
-            <p class="desc">
-              统一管理家庭菜式，支持创建、编辑、删除，并配套基础食材库输入体验。
-            </p>
-          </div>
-          <div class="usage-pill">
-            <span>已用 / 上限</span>
-            <strong>{{ dishUsageText }}</strong>
-          </div>
-        </header>
-        <div class="recipe-actions">
-          <button
-            type="button"
-            class="btn btn-primary"
-            :disabled="!familyStore.hasFamily"
-            @click="goRecipeManagement"
-          >
-            打开菜谱管理
-          </button>
-          <small>入口位于家庭空间，无需额外下载。</small>
+    <!-- 家庭信息 -->
+    <section v-else class="family-info card">
+      <div class="family-info__header">
+        <div>
+          <p class="family-info__label">我的家庭</p>
+          <h2 class="family-info__name">{{ familyStore.familyName }}</h2>
         </div>
-      </article>
+        <span class="tag tag--success tag--pill">{{ roleLabel }}</span>
+      </div>
 
-      <article class="card members-card">
-        <header>
-          <div>
-            <h2>家庭成员</h2>
-            <p class="desc">查看角色、加入时间，Owner 可在此扩展编辑操作。</p>
-          </div>
-          <button
-            type="button"
-            class="btn btn-ghost btn--sm"
-            @click="refreshMembers"
-            :disabled="familyStore.membersLoading"
-          >
-            {{ familyStore.membersLoading ? '加载中...' : '刷新列表' }}
-          </button>
-        </header>
-        <ul v-if="familyStore.members.length" class="member-list">
-          <li v-for="member in familyStore.members" :key="member.user_id">
-            <div class="member-meta">
-              <strong>{{ member.nickname || '未命名' }}</strong>
-              <span>{{ formatJoinedAt(member.joined_at) }}</span>
-            </div>
-            <span class="role-pill" :class="member.role">{{ formatRole(member.role) }}</span>
-          </li>
-        </ul>
-        <p v-else class="desc">尚无成员加入，快邀请家人一起管理菜单。</p>
-      </article>
+      <p v-if="familyStore.familyInfo?.description" class="family-info__desc">
+        {{ familyStore.familyInfo.description }}
+      </p>
 
-      <article class="card invite-card" :class="{ disabled: !canInvite }">
-        <header>
-          <div>
-            <h2>扫码邀请</h2>
-            <p class="desc">
-              {{ canInvite ? '分享二维码或链接，家人扫码后可选择同意/拒绝加入。' : '仅家庭管理员可生成邀请。' }}
-            </p>
-          </div>
-        </header>
-        <div class="invite-link">
-          <label>邀请链接</label>
-          <div class="link-row">
-            <input :value="inviteLink" class="form-control" readonly />
-            <button
-              type="button"
-              class="btn btn-primary btn--sm"
-              @click="copyInviteLink"
-              :disabled="!canInvite || copying || !inviteLink"
-            >
-              {{ copying ? '复制中...' : '复制' }}
-            </button>
-          </div>
-          <small
-            v-if="copyResult"
-            class="feedback"
-            :class="{ error: copyState === 'error', success: copyState === 'success' }"
-          >
-            {{ copyResult }}
-          </small>
+      <div class="family-info__stats">
+        <div class="stat stat--sm">
+          <span class="stat__value">{{ familyStore.memberCount }}</span>
+          <span class="stat__label">成员</span>
         </div>
-        <div class="qr-area">
-          <div class="qr-box" v-if="qrDataUrl && canInvite">
-            <img :src="qrDataUrl" alt="邀请二维码" />
-          </div>
-          <div class="qr-placeholder" v-else>
-            <p>{{ qrPlaceholder }}</p>
-          </div>
-          <ul>
-            <li>二维码包含家庭名称与邀请人昵称。</li>
-            <li>扫码后将跳转至邀请落地页，需登录确认。</li>
-            <li>拒绝邀请不会触发接口，保持轻量。</li>
-          </ul>
+        <div class="stat stat--sm">
+          <span class="stat__value">{{ dishCount }}</span>
+          <span class="stat__label">菜式</span>
         </div>
-      </article>
+        <div class="stat stat--sm">
+          <span class="stat__value">{{ maxDishes }}</span>
+          <span class="stat__label">上限</span>
+        </div>
+      </div>
     </section>
 
-    <section class="card followup">
-      <h2>下一步规划</h2>
-      <p>家庭设置完成后，可继续完善菜谱、AI 服务、购物清单等功能模块。</p>
+    <!-- 功能入口 -->
+    <section v-if="familyStore.hasFamily" class="feature-list">
+      <!-- 成员管理 -->
+      <div class="feature-card card card--flat" @click="toggleMembers">
+        <div class="feature-card__main">
+          <div class="feature-card__icon">
+            <IconFamily />
+          </div>
+          <div class="feature-card__content">
+            <h3>家庭成员</h3>
+            <p>{{ familyStore.memberCount }} 位成员</p>
+          </div>
+        </div>
+        <IconChevronRight 
+          class="feature-card__arrow" 
+          :class="{ 'feature-card__arrow--open': showMembers }"
+        />
+      </div>
+
+      <!-- 成员列表（展开显示） -->
+      <transition name="slide">
+        <div v-if="showMembers" class="members-panel">
+          <div v-if="familyStore.membersLoading" class="members-loading">
+            <span class="loading-spinner"></span>
+            <span>加载中...</span>
+          </div>
+          <template v-else>
+            <div 
+              v-for="member in familyStore.members" 
+              :key="member.user_id"
+              class="member-item"
+            >
+              <div class="avatar avatar--sm">{{ getMemberInitial(member) }}</div>
+              <div class="member-item__info">
+                <span class="member-item__name">{{ member.nickname || '未命名' }}</span>
+                <span class="member-item__date">{{ formatJoinedAt(member.joined_at) }} 加入</span>
+              </div>
+              <span 
+                class="tag tag--pill" 
+                :class="member.role === 'owner' ? 'tag--success' : 'tag--default'"
+              >
+                {{ member.role === 'owner' ? '管理员' : '成员' }}
+              </span>
+            </div>
+          </template>
+        </div>
+      </transition>
+
+      <!-- 菜谱管理 -->
+      <router-link to="/recipes" class="feature-card card card--flat">
+        <div class="feature-card__main">
+          <div class="feature-card__icon feature-card__icon--primary">
+            <IconBook />
+          </div>
+          <div class="feature-card__content">
+            <h3>菜谱管理</h3>
+            <p>管理家庭菜式库</p>
+          </div>
+        </div>
+        <IconChevronRight class="feature-card__arrow" />
+      </router-link>
+
+      <!-- 邀请成员（仅管理员可见） -->
+      <div v-if="isOwner" class="feature-card card card--flat" @click="toggleInvite">
+        <div class="feature-card__main">
+          <div class="feature-card__icon feature-card__icon--warning">
+            <IconPlus />
+          </div>
+          <div class="feature-card__content">
+            <h3>邀请成员</h3>
+            <p>分享二维码邀请家人</p>
+          </div>
+        </div>
+        <IconChevronRight 
+          class="feature-card__arrow" 
+          :class="{ 'feature-card__arrow--open': showInvite }"
+        />
+      </div>
+
+      <!-- 邀请面板 -->
+      <transition name="slide">
+        <div v-if="showInvite && isOwner" class="invite-panel card card--flat">
+          <div class="invite-panel__qr">
+            <img v-if="qrDataUrl" :src="qrDataUrl" alt="邀请二维码" />
+            <div v-else class="invite-panel__qr-placeholder">
+              <span class="loading-spinner" v-if="qrLoading"></span>
+              <span v-else>{{ qrError || '生成二维码中...' }}</span>
+            </div>
+          </div>
+          <div class="invite-panel__link">
+            <label class="form-label">邀请链接</label>
+            <div class="invite-panel__link-row">
+              <input 
+                :value="inviteLink" 
+                class="input" 
+                readonly 
+                @click="$event.target.select()"
+              />
+              <button 
+                type="button" 
+                class="btn btn--primary btn--sm" 
+                @click="copyInviteLink"
+                :disabled="!inviteLink"
+              >
+                {{ copyText }}
+              </button>
+            </div>
+          </div>
+          <p class="invite-panel__hint">家人扫码后需要登录才能加入</p>
+        </div>
+      </transition>
+    </section>
+
+    <!-- 设置区域 -->
+    <section class="settings-section">
+      <div class="settings-card card card--flat" @click="handleRefresh">
+        <div class="settings-card__main">
+          <span>刷新数据</span>
+        </div>
+        <span v-if="refreshing" class="loading-spinner loading-spinner--sm"></span>
+      </div>
+
+      <div class="settings-card settings-card--danger card card--flat" @click="handleLogout">
+        <div class="settings-card__main">
+          <span>退出登录</span>
+        </div>
+      </div>
     </section>
   </div>
 </template>
 
 <script setup>
+/**
+ * 个人中心页面
+ * 
+ * 功能：
+ * - 用户信息展示
+ * - 家庭管理（创建/查看）
+ * - 成员管理
+ * - 邀请功能
+ * - 退出登录
+ */
 import { computed, reactive, ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import QRCode from 'qrcode'
 import { useUserStore } from '@/stores/user'
 import { useFamilyStore } from '@/stores/family'
+import IconFamily from '@/components/icons/IconFamily.vue'
+import IconBook from '@/components/icons/IconBook.vue'
+import IconPlus from '@/components/icons/IconPlus.vue'
+import IconChevronRight from '@/components/icons/IconChevronRight.vue'
 
+const router = useRouter()
 const userStore = useUserStore()
 const familyStore = useFamilyStore()
-const router = useRouter()
 
-const greeting = computed(() => {
-  return userStore.nickname ? `${userStore.nickname}，欢迎回家` : '欢迎回到家庭空间'
-})
+// 展开状态
+const showMembers = ref(false)
+const showInvite = ref(false)
+const refreshing = ref(false)
 
-const membershipCopy = computed(() => {
-  const mapping = {
-    premium: '黄金会员',
-    vip: '尊享会员',
-    pro: '暖厨 PRO',
-    free: '体验版'
-  }
-  return mapping[userStore.membershipType] || '体验版'
-})
-
+// 创建家庭表单
 const createForm = reactive({
   name: '',
   description: ''
 })
+const createErrors = reactive({ name: '' })
 
-const createErrors = reactive({
-  name: ''
-})
-
-const feedback = ref('')
-const feedbackType = ref('info')
-const copyResult = ref('')
-const copyState = ref('info')
-const copying = ref(false)
+// 邀请相关
 const qrDataUrl = ref('')
 const qrLoading = ref(false)
 const qrError = ref('')
+const copyText = ref('复制')
 
-const showCreate = computed(() => !familyStore.hasFamily)
-
-const dishUsageText = computed(() => {
-  const used = familyStore.familyInfo?.dish_count || 0
-  const max = familyStore.familyInfo?.max_dishes || 30
-  return `${used} / ${max}`
+// 用户首字母
+const userInitial = computed(() => {
+  const name = userStore.nickname || userStore.phone || ''
+  return name.charAt(0).toUpperCase()
 })
 
-const normalizeId = (value) => {
-  if (value === undefined || value === null) return null
-  return String(value)
-}
-
-const currentUserId = computed(() => {
-  if (userStore.userId == null) return null
-  return normalizeId(userStore.userId)
-})
-
-const membershipRole = computed(() => {
-  if (!familyStore.hasFamily) return 'member'
-  const myId = currentUserId.value
-  const possibleOwnerIds = [familyStore.familyInfo?.owner_id, familyStore.familyInfo?.ownerId]
-    .map(normalizeId)
-    .filter(Boolean)
-  if (myId && possibleOwnerIds.some((id) => id === myId)) {
-    return 'owner'
+// 会员标签
+const membershipLabel = computed(() => {
+  const labels = {
+    premium: '黄金会员',
+    vip: '尊享会员',
+    pro: '暖厨 PRO',
+    free: '免费版'
   }
-  const me = familyStore.members.find((member) => {
-    const ids = [member.user_id, member.userId, member.id]
-      .map(normalizeId)
-      .filter(Boolean)
-    return myId && ids.some((id) => id === myId)
-  })
-  return me?.role || familyStore.familyInfo?.member_role || familyStore.familyInfo?.role || 'member'
+  return labels[userStore.membershipType] || '免费版'
 })
 
-const roleCopy = computed(() => {
-  return membershipRole.value === 'owner' ? '家庭管理员' : '家庭成员'
+// 是否为管理员
+const isOwner = computed(() => {
+  if (!familyStore.hasFamily) return false
+  const myId = String(userStore.userId)
+  const ownerId = String(familyStore.familyInfo?.owner_id || familyStore.familyInfo?.ownerId)
+  return myId === ownerId
 })
 
-const roleDesc = computed(() => {
-  return membershipRole.value === 'owner'
-    ? '可以管理家庭信息、邀请成员与编辑权限。'
-    : '可查看家庭信息、接收菜单与清单同步。'
-})
+// 角色标签
+const roleLabel = computed(() => isOwner.value ? '管理员' : '成员')
 
-const canInvite = computed(() => membershipRole.value === 'owner')
+// 菜式数量
+const dishCount = computed(() => familyStore.familyInfo?.dish_count || 0)
+const maxDishes = computed(() => familyStore.familyInfo?.max_dishes || 30)
 
-const inviteBase =
-  import.meta.env.VITE_INVITE_BASE_URL ||
+// 邀请链接
+const inviteBase = import.meta.env.VITE_INVITE_BASE_URL || 
   (typeof window !== 'undefined' ? window.location.origin : '')
 
 const inviteLink = computed(() => {
-  if (!familyStore.hasFamily || !userStore.userId || !inviteBase) return ''
+  if (!familyStore.hasFamily || !userStore.userId) return ''
   const familyId = familyStore.familyInfo?.family_id
   if (!familyId) return ''
   const params = new URLSearchParams({
@@ -323,422 +316,479 @@ const inviteLink = computed(() => {
   return `${inviteBase}/invite?${params.toString()}`
 })
 
-const qrPlaceholder = computed(() => {
-  if (!familyStore.hasFamily) return '请先创建或加入家庭'
-  if (!canInvite.value) return '仅家庭管理员可生成邀请二维码'
-  if (qrLoading.value) return '二维码生成中...'
-  if (qrError.value) return qrError.value
-  return '暂无二维码可用'
-})
+// 获取成员首字母
+const getMemberInitial = (member) => {
+  const name = member.nickname || ''
+  return name.charAt(0).toUpperCase() || '?'
+}
 
-const generateInviteQr = async () => {
-  if (!inviteLink.value || !canInvite.value) {
-    qrDataUrl.value = ''
-    qrError.value = ''
-    qrLoading.value = false
-    return
+// 格式化加入时间
+const formatJoinedAt = (value) => {
+  if (!value) return '未知'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return `${date.getMonth() + 1}/${date.getDate()}`
+}
+
+// 切换成员列表
+const toggleMembers = () => {
+  showMembers.value = !showMembers.value
+  if (showMembers.value && !familyStore.members.length) {
+    familyStore.fetchMembers()
   }
+}
+
+// 切换邀请面板
+const toggleInvite = () => {
+  showInvite.value = !showInvite.value
+  if (showInvite.value && !qrDataUrl.value) {
+    generateQr()
+  }
+}
+
+// 生成二维码
+const generateQr = async () => {
+  if (!inviteLink.value) return
   qrLoading.value = true
   qrError.value = ''
   try {
     qrDataUrl.value = await QRCode.toDataURL(inviteLink.value, {
-      width: 240,
+      width: 200,
       margin: 1,
       errorCorrectionLevel: 'M'
     })
   } catch (error) {
-    console.error('Generate QR error:', error)
-    qrError.value = '二维码生成失败，请稍后再试'
-    qrDataUrl.value = ''
+    qrError.value = '生成失败'
+    console.error('QR error:', error)
   } finally {
     qrLoading.value = false
   }
 }
 
-const validateCreate = () => {
+// 复制链接
+const copyInviteLink = async () => {
+  if (!inviteLink.value) return
+  try {
+    await navigator.clipboard.writeText(inviteLink.value)
+    copyText.value = '已复制'
+    setTimeout(() => { copyText.value = '复制' }, 2000)
+  } catch (error) {
+    copyText.value = '失败'
+    setTimeout(() => { copyText.value = '复制' }, 2000)
+  }
+}
+
+// 创建家庭
+const handleCreateFamily = async () => {
   createErrors.name = ''
   const trimmed = createForm.name.trim()
   if (!trimmed) {
     createErrors.name = '请输入家庭名称'
-  } else if (trimmed.length < 2) {
-    createErrors.name = '家庭名称至少 2 个字'
+    return
   }
-  return !createErrors.name
-}
-
-const handleCreate = async () => {
-  feedback.value = ''
-  feedbackType.value = 'info'
-
-  if (!validateCreate()) return
+  if (trimmed.length < 2) {
+    createErrors.name = '至少 2 个字'
+    return
+  }
 
   try {
     await familyStore.createFamily({
-      name: createForm.name.trim(),
+      name: trimmed,
       description: createForm.description.trim()
     })
-    feedback.value = '家庭创建成功，已自动加入。'
-    feedbackType.value = 'success'
     await familyStore.fetchMembers(true)
   } catch (error) {
-    feedback.value = error.message || '创建失败，请稍后重试'
-    feedbackType.value = 'error'
+    createErrors.name = error.message || '创建失败'
   }
 }
 
-const refreshInfo = async () => {
-  feedback.value = ''
+// 刷新数据
+const handleRefresh = async () => {
+  if (refreshing.value) return
+  refreshing.value = true
   try {
     await familyStore.fetchFamilyInfo(true)
     if (familyStore.hasFamily) {
       await familyStore.fetchMembers(true)
     }
-    await generateInviteQr()
   } catch (error) {
-    feedback.value = error.message || '同步失败'
-    feedbackType.value = 'error'
-  }
-}
-
-const refreshMembers = async () => {
-  try {
-    await familyStore.fetchMembers(true)
-    await generateInviteQr()
-  } catch (error) {
-    feedback.value = error.message || '成员列表刷新失败'
-    feedbackType.value = 'error'
-  }
-}
-
-const copyInviteLink = async () => {
-  if (!inviteLink.value) return
-  copying.value = true
-  copyResult.value = ''
-  copyState.value = 'info'
-  try {
-    await navigator.clipboard.writeText(inviteLink.value)
-    copyResult.value = '已复制到剪贴板'
-    copyState.value = 'success'
-  } catch (error) {
-    copyResult.value = '复制失败，请手动复制链接'
-    copyState.value = 'error'
+    console.error('Refresh error:', error)
   } finally {
-    copying.value = false
+    refreshing.value = false
   }
 }
 
-const formatRole = (role) => (role === 'owner' ? '管理员' : '成员')
-
-const goRecipeManagement = () => {
-  if (!familyStore.hasFamily) {
-    window.alert('请先创建或加入家庭')
-    return
+// 退出登录
+const handleLogout = () => {
+  if (window.confirm('确定要退出登录吗？')) {
+    userStore.logout()
+    router.push('/login')
   }
-  router.push('/recipes')
 }
 
-const formatJoinedAt = (value) => {
-  if (!value) return '时间未知'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleDateString()
-}
-
+// 初始化
 onMounted(async () => {
-  await refreshInfo()
+  await familyStore.fetchFamilyInfo()
+  if (familyStore.hasFamily) {
+    await familyStore.fetchMembers()
+  }
 })
 
-watch(
-  () => familyStore.hasFamily,
-  (has) => {
-    if (has) {
-      familyStore.fetchMembers()
-    }
+// 监听邀请链接变化重新生成二维码
+watch(inviteLink, () => {
+  if (showInvite.value && inviteLink.value) {
+    generateQr()
   }
-)
-
-watch(
-  [inviteLink, canInvite],
-  async () => {
-    await generateInviteQr()
-  },
-  { immediate: true }
-)
+})
 </script>
 
 <style scoped>
-.hero {
+.profile-page {
+  padding-top: var(--space-4);
+}
+
+/* 用户卡片 */
+.user-card {
+  background: var(--gradient-primary);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
+  color: white;
+}
+
+.user-card__main {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.hero-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  color: var(--color-text-secondary);
-}
-
-.hero-tags span {
-  padding: 8px 14px;
-  border-radius: var(--radius-medium);
-  background: var(--color-surface);
-}
-
-.summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-}
-
-.summary article {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-medium);
-  padding: 18px;
-}
-
-.label {
-  margin: 0 0 8px;
-  font-size: 12px;
-  letter-spacing: 0.3em;
-  color: var(--color-text-secondary);
-}
-
-.summary h3 {
-  margin: 0 0 6px;
-}
-
-.desc {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.create-card header,
-.family-info header,
-.members-card header,
-.invite-card header {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
-
-.create-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.create-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.create-form textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-.error-text {
-  color: #ff6b6b;
-  font-size: 13px;
-}
-
-.feedback {
-  margin: 0;
-  font-size: 14px;
-  color: var(--color-text-secondary);
-}
-
-.feedback.error {
-  color: #ff6b6b;
-}
-
-.feedback.success {
-  color: #2cb67d;
-}
-
-.family-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-}
-
-.info-stats {
-  margin: 20px 0 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.info-stats dt {
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  color: var(--color-text-secondary);
-}
-
-.info-stats dd {
-  margin: 4px 0 0;
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.member-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.member-list li {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  border-radius: var(--radius-medium);
-  background: var(--color-surface);
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
-.member-meta strong {
-  display: block;
+.user-card .avatar {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: var(--font-weight-bold);
 }
 
-.member-meta span {
-  font-size: 13px;
-  color: var(--color-text-secondary);
+.user-card__name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--space-1);
 }
 
-.role-pill {
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 13px;
-  border: 1px solid var(--color-border);
+.user-card__phone {
+  font-size: var(--font-size-sm);
+  opacity: 0.85;
+  margin: 0;
 }
 
-.role-pill.owner {
-  background: rgba(44, 182, 125, 0.1);
+.user-card__tag .tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
   border: none;
-  color: #2cb67d;
 }
 
-.recipes-card header {
+/* 创建家庭 */
+.family-create {
+  margin-bottom: var(--space-5);
+}
+
+.family-create__header {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: center;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
 }
 
-.usage-pill {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-medium);
-  padding: 12px;
-  text-align: center;
+.family-create__icon {
+  width: 40px;
+  height: 40px;
+  padding: var(--space-2);
+  background: var(--color-primary-100);
+  color: var(--color-primary);
+  border-radius: var(--radius-lg);
 }
 
-.usage-pill span {
-  display: block;
-  font-size: 12px;
+.family-create__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-heading);
+  margin: 0 0 var(--space-1);
+}
+
+.family-create__desc {
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+  margin: 0;
 }
 
-.usage-pill strong {
-  font-size: 20px;
-}
-
-
-.recipe-actions {
-  margin-top: 12px;
+.family-create__form {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-4);
 }
 
-.recipe-actions small {
-  color: var(--color-text-secondary);
+/* 家庭信息 */
+.family-info {
+  margin-bottom: var(--space-4);
 }
 
-.invite-card.disabled {
-  opacity: 0.7;
-}
-
-.invite-link label {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
-
-.link-row {
+.family-info__header {
   display: flex;
-  gap: 8px;
-  margin-top: 6px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-3);
 }
 
-.link-row input {
+.family-info__label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-1);
+}
+
+.family-info__name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-heading);
+  margin: 0;
+}
+
+.family-info__desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-4);
+}
+
+.family-info__stats {
+  display: flex;
+  gap: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-light);
+}
+
+/* 功能列表 */
+.feature-list {
+  margin-bottom: var(--space-5);
+}
+
+.feature-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  margin-bottom: var(--space-2);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--transition-fast);
+}
+
+.feature-card:hover {
+  background: var(--color-bg-sunken);
+}
+
+.feature-card__main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.feature-card__icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-sunken);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-secondary);
+}
+
+.feature-card__icon--primary {
+  background: var(--color-primary-100);
+  color: var(--color-primary);
+}
+
+.feature-card__icon--warning {
+  background: var(--color-warning-100);
+  color: var(--color-warning-600);
+}
+
+.feature-card__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.feature-card__content h3 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-heading);
+  margin: 0 0 var(--space-1);
+}
+
+.feature-card__content p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.feature-card__arrow {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-tertiary);
+  transition: transform var(--transition-fast);
+}
+
+.feature-card__arrow--open {
+  transform: rotate(90deg);
+}
+
+/* 成员面板 */
+.members-panel {
+  background: var(--color-bg-sunken);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.members-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+}
+
+.member-item:last-child {
+  margin-bottom: 0;
+}
+
+.member-item__info {
   flex: 1;
 }
 
-.qr-area {
-  display: flex;
-  gap: 16px;
-  margin-top: 16px;
-  align-items: flex-start;
-  flex-wrap: wrap;
+.member-item__name {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-heading);
 }
 
-.qr-box {
-  width: 220px;
-  height: 220px;
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: var(--radius-medium);
+.member-item__date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* 邀请面板 */
+.invite-panel {
+  padding: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.invite-panel__qr {
+  width: 160px;
+  height: 160px;
+  margin: 0 auto var(--space-4);
+  background: white;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid var(--color-border);
-  background: #fff;
-  flex: 0 0 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.qr-box img {
+.invite-panel__qr img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.qr-placeholder {
-  width: 220px;
-  height: 220px;
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: var(--radius-medium);
-  border: 1px dashed var(--color-border);
+.invite-panel__qr-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+.invite-panel__link {
+  margin-bottom: var(--space-3);
+}
+
+.invite-panel__link-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.invite-panel__link-row .input {
+  flex: 1;
+  font-size: var(--font-size-xs);
+}
+
+.invite-panel__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  text-align: center;
+  margin: 0;
+}
+
+/* 设置区域 */
+.settings-section {
+  margin-top: var(--space-6);
+}
+
+.settings-card {
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: var(--color-text-secondary);
-  flex: 0 0 220px;
+  justify-content: space-between;
+  padding: var(--space-4);
+  margin-bottom: var(--space-2);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
 }
 
-.qr-area ul {
-  margin: 0;
-  padding-left: 18px;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-  flex: 1 1 200px;
+.settings-card:hover {
+  background: var(--color-bg-sunken);
 }
 
-.followup h2 {
-  margin: 0 0 8px;
+.settings-card__main {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
 }
 
-@media (min-width: 720px) {
-  .hero {
-    flex-direction: row;
-    justify-content: space-between;
-  }
+.settings-card--danger .settings-card__main {
+  color: var(--color-danger-500);
+}
+
+/* 动画 */
+.slide-enter-active,
+.slide-leave-active {
+  transition: all var(--duration-normal) var(--ease-out);
+  overflow: hidden;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.slide-enter-to,
+.slide-leave-from {
+  max-height: 500px;
 }
 </style>

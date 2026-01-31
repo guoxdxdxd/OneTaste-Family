@@ -1,33 +1,261 @@
+/**
+ * OneTaste Family 设计系统
+ * 
+ * 设计理念：温暖精致 (Warm & Refined)
+ * - 暖橙色系为主色调，传递家庭温馨感
+ * - 丰富的层次感，通过渐变和阴影创造深度
+ * - 精致的细节处理，体现商业级品质
+ */
+
 :root {
-  --color-background: #fffaf6;
-  --color-surface: #fff5ef;
-  --color-surface-muted: #ffe9dd;
-  --color-card: #ffffff;
-  --color-border: #f3dfd4;
-  --color-border-strong: #d8bba7;
-  --color-accent: #f08a5d;
-  --color-accent-soft: #f9b995;
-  --color-primary: #f08a5d;
-  --color-primary-dark: #dd7243;
-  --color-primary-soft: #f9b995;
-  --color-muted: #c08b72;
-  --color-success: #2cb67d;
-  --color-warning: #f6c343;
-  --color-danger: #f25f4c;
-  --color-text-heading: #3b261d;
-  --color-text-primary: #5a3b2e;
-  --color-text-secondary: #a07e6b;
-  --shadow-card: 0 12px 35px rgba(216, 150, 122, 0.18);
-  --shadow-soft: 0 6px 18px rgba(216, 150, 122, 0.14);
-  --radius-large: 20px;
-  --radius-medium: 14px;
-  --radius-small: 10px;
-  --radius-pill: 999px;
-  --font-family-base: 'PingFang SC', 'Hiragino Sans GB', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
-  --font-size-base: 16px;
-  --font-size-sm: 14px;
+  /* ============================================
+   * 色彩系统 (Color System)
+   * ============================================ */
+  
+  /* 主色调 - 温暖橙 (Warm Orange) */
+  --color-primary-50: #fff8f5;
+  --color-primary-100: #ffede5;
+  --color-primary-200: #ffd9c7;
+  --color-primary-300: #ffbfa3;
+  --color-primary-400: #ff9f70;
+  --color-primary-500: #f08a5d;  /* 主色 */
+  --color-primary-600: #e06d3c;
+  --color-primary-700: #c4532a;
+  --color-primary-800: #a04222;
+  --color-primary-900: #7a3520;
+  
+  /* 语义化主色别名 */
+  --color-primary: var(--color-primary-500);
+  --color-primary-light: var(--color-primary-300);
+  --color-primary-dark: var(--color-primary-600);
+  --color-primary-surface: var(--color-primary-50);
+  
+  /* 辅助色 - 暖棕 (Warm Brown) */
+  --color-secondary-50: #faf8f6;
+  --color-secondary-100: #f5f0eb;
+  --color-secondary-200: #e8ddd3;
+  --color-secondary-300: #d4c4b5;
+  --color-secondary-400: #bda391;
+  --color-secondary-500: #a68872;
+  --color-secondary-600: #8b6d58;
+  --color-secondary-700: #705748;
+  --color-secondary-800: #5a463a;
+  --color-secondary-900: #483830;
+  
+  /* 功能色 (Functional Colors) */
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  
+  --color-danger-50: #fef2f2;
+  --color-danger-100: #fee2e2;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  
+  --color-info-50: #eff6ff;
+  --color-info-100: #dbeafe;
+  --color-info-500: #3b82f6;
+  --color-info-600: #2563eb;
+  
+  /* 中性色 (Neutral Colors) */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-gray-600: #525252;
+  --color-gray-700: #404040;
+  --color-gray-800: #262626;
+  --color-gray-900: #171717;
+  
+  /* 背景色系统 */
+  --color-bg-base: #fffbf8;           /* 页面背景 - 温暖米白 */
+  --color-bg-elevated: #ffffff;        /* 卡片背景 */
+  --color-bg-sunken: #faf6f3;          /* 凹陷区域背景 */
+  --color-bg-overlay: rgba(0, 0, 0, 0.5); /* 遮罩层 */
+  
+  /* 文字色彩 */
+  --color-text-heading: #2d1f1a;       /* 标题色 - 深棕 */
+  --color-text-primary: #4a3832;       /* 主文字 - 棕色 */
+  --color-text-secondary: #8c7268;     /* 次要文字 */
+  --color-text-tertiary: #b8a89e;      /* 辅助文字 */
+  --color-text-inverse: #ffffff;       /* 反色文字 */
+  --color-text-link: var(--color-primary-600);
+  
+  /* 边框色彩 */
+  --color-border-light: #f3ebe6;       /* 轻边框 */
+  --color-border-default: #e8ddd5;     /* 默认边框 */
+  --color-border-strong: #d4c4b8;      /* 强边框 */
+  
+  /* ============================================
+   * 渐变系统 (Gradient System)
+   * ============================================ */
+  
+  /* 主色渐变 */
+  --gradient-primary: linear-gradient(135deg, #ff9f70 0%, #f08a5d 50%, #e06d3c 100%);
+  --gradient-primary-soft: linear-gradient(135deg, #fff8f5 0%, #ffede5 100%);
+  
+  /* 背景装饰渐变 */
+  --gradient-warm: linear-gradient(180deg, #fffbf8 0%, #fff5ef 100%);
+  --gradient-hero: linear-gradient(135deg, #fff8f5 0%, #ffede5 50%, #ffd9c7 100%);
+  
+  /* 卡片悬浮渐变 */
+  --gradient-card-hover: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 248, 245, 0.4) 100%);
+  
+  /* ============================================
+   * 阴影系统 (Shadow System)
+   * ============================================ */
+  
+  /* 基础阴影 - 使用暖色调 */
+  --shadow-xs: 0 1px 2px rgba(160, 66, 34, 0.04);
+  --shadow-sm: 0 2px 4px rgba(160, 66, 34, 0.06), 0 1px 2px rgba(160, 66, 34, 0.04);
+  --shadow-md: 0 4px 12px rgba(160, 66, 34, 0.08), 0 2px 4px rgba(160, 66, 34, 0.04);
+  --shadow-lg: 0 8px 24px rgba(160, 66, 34, 0.10), 0 4px 8px rgba(160, 66, 34, 0.06);
+  --shadow-xl: 0 16px 48px rgba(160, 66, 34, 0.12), 0 8px 16px rgba(160, 66, 34, 0.08);
+  
+  /* 特殊阴影 */
+  --shadow-card: 0 4px 20px rgba(160, 66, 34, 0.08);
+  --shadow-card-hover: 0 8px 32px rgba(160, 66, 34, 0.12);
+  --shadow-button: 0 2px 8px rgba(240, 138, 93, 0.3);
+  --shadow-button-hover: 0 4px 16px rgba(240, 138, 93, 0.4);
+  --shadow-inner: inset 0 2px 4px rgba(160, 66, 34, 0.06);
+  
+  /* 发光效果 */
+  --shadow-glow-primary: 0 0 20px rgba(240, 138, 93, 0.3);
+  --shadow-glow-success: 0 0 20px rgba(34, 197, 94, 0.3);
+  
+  /* ============================================
+   * 圆角系统 (Border Radius)
+   * ============================================ */
+  
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
+  --radius-full: 9999px;
+  
+  /* ============================================
+   * 间距系统 (Spacing System)
+   * ============================================ */
+  
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  
+  /* ============================================
+   * 字体系统 (Typography System)
+   * ============================================ */
+  
+  /* 字体族 */
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-family-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+  
+  /* 字体大小 */
   --font-size-xs: 12px;
-  --line-height-base: 1.6;
-  --space-base: 8px;
-  --transition-base: 0.2s ease;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 28px;
+  --font-size-4xl: 32px;
+  --font-size-5xl: 40px;
+  
+  /* 字重 */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* 行高 */
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+  
+  /* 字间距 */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.02em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+  
+  /* ============================================
+   * 动效系统 (Animation & Transition)
+   * ============================================ */
+  
+  /* 时长 */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
+  
+  /* 缓动函数 */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  /* 组合过渡 */
+  --transition-fast: var(--duration-fast) var(--ease-out);
+  --transition-normal: var(--duration-normal) var(--ease-out);
+  --transition-slow: var(--duration-slow) var(--ease-out);
+  --transition-colors: color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+  --transition-transform: transform var(--duration-normal) var(--ease-spring);
+  --transition-shadow: box-shadow var(--duration-normal) var(--ease-out);
+  
+  /* ============================================
+   * 布局系统 (Layout)
+   * ============================================ */
+  
+  --container-max-width: 480px;
+  --header-height: 56px;
+  --tabbar-height: 72px;
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  
+  /* ============================================
+   * Z-Index 层级系统
+   * ============================================ */
+  
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-toast: 700;
+}
+
+/* ============================================
+ * 暗色模式预留 (Dark Mode - 预留)
+ * ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root.auto-dark {
+    /* 暗色模式变量可在此定义 */
+  }
 }
