@@ -1,96 +1,61 @@
 <template>
-  <div class="app-shell">
-    <main class="app-content">
-      <router-view />
+  <div class="app-layout" :class="{ 'app-layout--with-tabbar': showTabBar }">
+    <!-- 主内容区域 -->
+    <main class="app-layout__main">
+      <router-view v-slot="{ Component }">
+        <transition name="page-fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </main>
-    <nav class="tab-bar">
-      <button
-        v-for="tab in tabs"
-        :key="tab.path"
-        type="button"
-        class="tab-item"
-        :class="{ active: isActive(tab.path) }"
-        @click="go(tab.path)"
-      >
-        <span class="tab-label">{{ tab.label }}</span>
-        <small>{{ tab.caption }}</small>
-      </button>
-    </nav>
+    
+    <!-- 底部导航栏 -->
+    <TabBar />
   </div>
 </template>
 
 <script setup>
-import { useRoute, useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import TabBar from '@/components/TabBar.vue'
 
-const router = useRouter()
 const route = useRoute()
 
-const tabs = [
-  { path: '/menus', label: '菜单', caption: '计划' },
-  { path: '/shopping', label: '买菜', caption: '清单' },
-  { path: '/profile', label: '我的', caption: '家庭' }
-]
-
-const isActive = (path) => {
-  return route.path.startsWith(path)
-}
-
-const go = (path) => {
-  if (route.path !== path) {
-    router.push(path)
-  }
-}
+// 显示 TabBar 的主页面
+const showTabBar = computed(() => {
+  const mainPages = ['/menus', '/shopping', '/profile', '/recipes']
+  return mainPages.includes(route.path)
+})
 </script>
 
 <style scoped>
-.app-shell {
+.app-layout {
   min-height: 100vh;
-  background: var(--color-background);
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  background: var(--color-bg-base);
 }
 
-.app-content {
+.app-layout__main {
   flex: 1;
-  padding-bottom: 80px;
-}
-
-.tab-bar {
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  border-top: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(16px);
-  padding: 4px;
-  column-gap: 8px;
-}
-
-.tab-item {
-  border: none;
-  background: transparent;
-  padding: 10px 8px;
-  border-radius: var(--radius-large);
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  font-size: 15px;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.tab-item small {
-  font-size: 12px;
-  letter-spacing: 0.3em;
+/* 有底部导航栏时，为其留出空间 */
+.app-layout--with-tabbar .app-layout__main {
+  padding-bottom: calc(var(--tabbar-height) + var(--safe-area-bottom));
 }
 
-.tab-item.active {
-  background: var(--color-surface);
-  color: var(--color-text-primary);
-  box-shadow: var(--shadow-card);
+/* 页面切换动画 */
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity var(--duration-normal) var(--ease-out);
+}
+
+.page-fade-enter-from,
+.page-fade-leave-to {
+  opacity: 0;
 }
 </style>

@@ -1,231 +1,469 @@
 <template>
-  <div class="shopping-page page">
-    <section class="card hero">
-      <div>
-        <p class="eyebrow">买菜 · 清单中心</p>
-        <h1>把菜单转成行动，避免多买或漏买</h1>
-        <p class="subtitle">
-          根据需求文档预留生成、编辑、分享清单的区域，未来可直接串联菜单模块与库存管理。
-        </p>
+  <div class="page shopping-page">
+    <!-- 页面头部 -->
+    <header class="shopping-header">
+      <div class="shopping-header__info">
+        <h1 class="shopping-header__title">买菜清单</h1>
+        <p class="shopping-header__desc">根据菜单自动汇总食材</p>
       </div>
-      <ul class="highlights">
-        <li>按菜单自动汇总食材</li>
-        <li>分类展示 · 一目了然</li>
-        <li>存放时间提醒</li>
-      </ul>
+      <button class="icon-btn" @click="handleRefresh" :disabled="loading">
+        <span v-if="loading" class="loading-spinner loading-spinner--sm"></span>
+        <IconRefresh v-else />
+      </button>
+    </header>
+
+    <!-- 快捷统计 -->
+    <section class="shopping-stats">
+      <div class="stat-card">
+        <span class="stat-card__value">{{ totalItems }}</span>
+        <span class="stat-card__label">待购项</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__value">{{ purchasedItems }}</span>
+        <span class="stat-card__label">已购买</span>
+      </div>
+      <div class="stat-card stat-card--accent">
+        <span class="stat-card__value">{{ categoryCount }}</span>
+        <span class="stat-card__label">分类</span>
+      </div>
     </section>
 
-    <section class="generator card">
-      <header>
-        <div>
-          <h2>自动生成购物清单</h2>
-          <p>选择日期范围或直接引用菜单，系统自动合并相同食材并计算总量。</p>
-        </div>
-        <button type="button" class="btn btn-gradient">即将接入</button>
-      </header>
-      <form class="generator-form">
-        <label>
-          <span>开始日期</span>
-          <input type="date" class="form-control" disabled />
-        </label>
-        <label>
-          <span>结束日期</span>
-          <input type="date" class="form-control" disabled />
-        </label>
-        <label>
-          <span>关联菜单</span>
-          <select class="form-control" disabled>
-            <option>本周菜单（3份）</option>
-          </select>
-        </label>
-      </form>
+    <!-- 生成清单入口 -->
+    <section class="generate-card card card--highlight">
+      <div class="generate-card__content">
+        <h3>生成购物清单</h3>
+        <p>选择日期范围，根据菜单自动计算食材用量</p>
+      </div>
+      <button class="btn btn--primary btn--sm" disabled>
+        即将上线
+      </button>
     </section>
 
-    <section class="list-preview card">
-      <header>
-        <h2>清单内容展示</h2>
-        <p>预留按分类展示、数量、单位、存放天数与状态切换的区域。</p>
-      </header>
-      <div class="categories">
-        <article
-          v-for="category in categories"
+    <!-- 清单内容 -->
+    <section class="shopping-list">
+      <div class="section-header">
+        <h2 class="section-title">清单内容</h2>
+        <span class="section-hint">点击可标记为已购买</span>
+      </div>
+
+      <!-- 空状态 -->
+      <div v-if="!categories.length" class="empty-state">
+        <div class="empty-state__icon">🛒</div>
+        <h3 class="empty-state__title">暂无购物清单</h3>
+        <p class="empty-state__description">创建菜单后可自动生成购物清单</p>
+      </div>
+
+      <!-- 分类列表 -->
+      <div v-else class="category-list">
+        <article 
+          v-for="category in categories" 
           :key="category.name"
-          class="card card--compact category-card"
+          class="category-section"
         >
-          <header>
-            <h3>{{ category.name }}</h3>
-            <span>{{ category.count }} 项</span>
-          </header>
-          <ul>
-            <li v-for="item in category.items" :key="item.name">
-              <div>
-                <strong>{{ item.name }}</strong>
-                <p>{{ item.quantity }}</p>
+          <div class="category-section__header">
+            <span class="category-section__icon">{{ category.icon }}</span>
+            <h3 class="category-section__title">{{ category.name }}</h3>
+            <span class="category-section__count">{{ category.items.length }} 项</span>
+          </div>
+
+          <div class="item-list">
+            <div 
+              v-for="item in category.items" 
+              :key="item.name"
+              class="shopping-item"
+              :class="{ 'shopping-item--done': item.purchased }"
+              @click="toggleItem(item)"
+            >
+              <div class="shopping-item__checkbox">
+                <IconCheck v-if="item.purchased" />
               </div>
-              <button type="button" class="btn btn-ghost btn--sm">标记</button>
-            </li>
-          </ul>
+              <div class="shopping-item__info">
+                <span class="shopping-item__name">{{ item.name }}</span>
+                <span class="shopping-item__quantity">{{ item.quantity }}</span>
+              </div>
+              <span v-if="item.storage" class="shopping-item__storage">
+                {{ item.storage }}
+              </span>
+            </div>
+          </div>
         </article>
       </div>
     </section>
 
-    <section class="card editor">
-      <div>
-        <h2>手动编辑清单</h2>
-        <p>添加/删除/修改数量、标记已购买等交互入口在此保留，方便后续直接绑定数据。</p>
-      </div>
-      <div class="editor-actions">
-        <button type="button" class="btn btn-ghost">添加食材</button>
-        <button type="button" class="btn btn-ghost">导入库存</button>
-        <button type="button" class="btn btn-ghost">分享清单</button>
-      </div>
+    <!-- 底部操作 -->
+    <section v-if="categories.length" class="shopping-actions">
+      <button class="btn btn--ghost btn--full" @click="clearPurchased">
+        清除已购买项
+      </button>
     </section>
   </div>
 </template>
 
 <script setup>
-const categories = [
+/**
+ * 购物清单页面
+ * 
+ * 功能：
+ * - 展示购物清单
+ * - 按分类显示食材
+ * - 标记已购买
+ */
+import { ref, computed } from 'vue'
+import IconCheck from '@/components/icons/IconCheck.vue'
+
+// 添加刷新图标组件（简单实现）
+const IconRefresh = {
+  template: `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+    </svg>
+  `
+}
+
+const loading = ref(false)
+
+// 模拟数据（实际应从接口获取）
+const categories = ref([
   {
-    name: '蔬菜类',
-    count: 4,
+    name: '蔬菜',
+    icon: '🥬',
     items: [
-      { name: '西兰花', quantity: '2 颗 / 2 天内食用' },
-      { name: '生菜', quantity: '1 颗 / 3 天内食用' }
+      { name: '西兰花', quantity: '2 颗', storage: '2天内', purchased: false },
+      { name: '生菜', quantity: '1 颗', storage: '3天内', purchased: false },
+      { name: '番茄', quantity: '4 个', storage: '5天内', purchased: true },
+      { name: '青椒', quantity: '3 个', storage: '4天内', purchased: false }
     ]
   },
   {
     name: '肉类',
-    count: 3,
+    icon: '🥩',
     items: [
-      { name: '鸡胸肉', quantity: '600g / 可冷冻 3 天' },
-      { name: '五花肉', quantity: '500g / 今日烹饪' }
+      { name: '鸡胸肉', quantity: '500g', storage: '冷冻3天', purchased: false },
+      { name: '五花肉', quantity: '400g', storage: '当天用', purchased: false }
     ]
   },
   {
     name: '调料',
-    count: 2,
+    icon: '🧂',
     items: [
-      { name: '生抽', quantity: '200ml' },
-      { name: '蚝油', quantity: '100ml' }
+      { name: '生抽', quantity: '1 瓶', storage: null, purchased: true },
+      { name: '蚝油', quantity: '1 瓶', storage: null, purchased: false }
+    ]
+  },
+  {
+    name: '其他',
+    icon: '🥚',
+    items: [
+      { name: '鸡蛋', quantity: '10 个', storage: '7天内', purchased: false }
     ]
   }
-]
+])
+
+// 统计数据
+const totalItems = computed(() => {
+  return categories.value.reduce((sum, cat) => {
+    return sum + cat.items.filter(item => !item.purchased).length
+  }, 0)
+})
+
+const purchasedItems = computed(() => {
+  return categories.value.reduce((sum, cat) => {
+    return sum + cat.items.filter(item => item.purchased).length
+  }, 0)
+})
+
+const categoryCount = computed(() => categories.value.length)
+
+// 切换购买状态
+const toggleItem = (item) => {
+  item.purchased = !item.purchased
+}
+
+// 刷新数据
+const handleRefresh = async () => {
+  loading.value = true
+  // 模拟加载
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  loading.value = false
+}
+
+// 清除已购买项
+const clearPurchased = () => {
+  if (!window.confirm('确定清除所有已购买的项目吗？')) return
+  categories.value.forEach(cat => {
+    cat.items = cat.items.filter(item => !item.purchased)
+  })
+  // 移除空分类
+  categories.value = categories.value.filter(cat => cat.items.length > 0)
+}
 </script>
 
 <style scoped>
-.hero {
+.shopping-page {
+  padding-top: var(--space-4);
+}
+
+/* 页面头部 */
+.shopping-header {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-5);
 }
 
-.highlights {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.shopping-header__title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-heading);
+  margin: 0 0 var(--space-1);
 }
 
-.highlights li {
-  background: var(--color-surface);
-  padding: 10px 16px;
-  border-radius: var(--radius-medium);
-}
-
-.generator header {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.generator-form {
-  margin-top: 20px;
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-.generator-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.shopping-header__desc {
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-}
-
-.list-preview header {
-  margin-bottom: 16px;
-}
-
-.categories {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-}
-
-.category-card {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.category-card header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.category-card ul {
-  list-style: none;
   margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 
-.category-card li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border-radius: var(--radius-small);
-  background: var(--color-surface);
+.icon-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
-.category-card strong {
+/* 统计卡片 */
+.shopping-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.stat-card {
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  text-align: center;
+  box-shadow: var(--shadow-card);
+}
+
+.stat-card--accent {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.stat-card__value {
   display: block;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-heading);
+  margin-bottom: var(--space-1);
 }
 
-.category-card p {
-  margin: 4px 0 0;
-  font-size: 13px;
+.stat-card--accent .stat-card__value {
+  color: white;
+}
+
+.stat-card__label {
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 
-.editor {
+.stat-card--accent .stat-card__label {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* 生成清单卡片 */
+.generate-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.generate-card__content h3 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-heading);
+  margin: 0 0 var(--space-1);
+}
+
+.generate-card__content p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* 区块标题 */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.section-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-heading);
+  margin: 0;
+}
+
+.section-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: var(--space-10) var(--space-6);
+}
+
+.empty-state__icon {
+  font-size: 48px;
+  margin-bottom: var(--space-4);
+}
+
+.empty-state__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-heading);
+  margin: 0 0 var(--space-2);
+}
+
+.empty-state__description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* 分类列表 */
+.category-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-5);
 }
 
-.editor-actions {
+.category-section {
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-card);
+}
+
+.category-section__header {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-light);
 }
-@media (min-width: 720px) {
-  .hero {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
 
-  .generator header {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
+.category-section__icon {
+  font-size: 20px;
+}
+
+.category-section__title {
+  flex: 1;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-heading);
+  margin: 0;
+}
+
+.category-section__count {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-sunken);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+/* 商品列表 */
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.shopping-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-bg-sunken);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.shopping-item:hover {
+  background: var(--color-border-light);
+}
+
+.shopping-item--done {
+  opacity: 0.6;
+}
+
+.shopping-item--done .shopping-item__name {
+  text-decoration: line-through;
+}
+
+.shopping-item__checkbox {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.shopping-item--done .shopping-item__checkbox {
+  background: var(--color-success-500);
+  border-color: var(--color-success-500);
+  color: white;
+}
+
+.shopping-item__checkbox svg {
+  width: 14px;
+  height: 14px;
+}
+
+.shopping-item__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.shopping-item__name {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-heading);
+  margin-bottom: 2px;
+}
+
+.shopping-item__quantity {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.shopping-item__storage {
+  font-size: var(--font-size-xs);
+  color: var(--color-warning-600);
+  background: var(--color-warning-100);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+/* 底部操作 */
+.shopping-actions {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-light);
 }
 </style>

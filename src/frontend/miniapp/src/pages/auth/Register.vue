@@ -1,190 +1,199 @@
 <template>
   <div class="auth-page">
-    <div class="auth-card card">
-      <header class="card-header">
-        <p class="eyebrow">一家一味 · 注册</p>
-        <h1>创建家庭账号</h1>
-        <p class="description">三步完成注册，与你家人一起记录味道与体贴的提醒。</p>
+    <!-- 装饰背景 -->
+    <div class="auth-page__bg">
+      <div class="auth-page__bg-circle auth-page__bg-circle--1"></div>
+      <div class="auth-page__bg-circle auth-page__bg-circle--2"></div>
+    </div>
+
+    <div class="auth-page__content">
+      <!-- 品牌区域 -->
+      <header class="auth-header">
+        <div class="auth-header__logo">
+          <span class="auth-header__logo-icon">🍳</span>
+        </div>
+        <h1 class="auth-header__title">一家一味</h1>
+        <p class="auth-header__subtitle">创建账号，开启家庭美食之旅</p>
       </header>
 
-      <form @submit.prevent="handleRegister" class="auth-form">
-        <div class="form-group">
-          <label for="phone">手机号</label>
-          <input
-            id="phone"
-            v-model="form.phone"
-            type="tel"
-            :class="['form-control', { error: errors.phone }]"
-            placeholder="请输入手机号"
-            maxlength="11"
-            @blur="validatePhone"
-            @input="clearError('phone')"
-          />
-          <span v-if="errors.phone" class="error-message">{{ errors.phone }}</span>
+      <!-- 注册表单卡片 -->
+      <div class="auth-card">
+        <div class="auth-card__header">
+          <h2 class="auth-card__title">创建账号</h2>
+          <p class="auth-card__desc">注册后即可创建或加入家庭</p>
         </div>
 
-        <div class="form-group">
-          <label for="password">密码</label>
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            :class="['form-control', { error: errors.password }]"
-            placeholder="请输入密码（6-20位）"
-            @blur="validatePassword"
-            @input="clearError('password')"
-          />
-          <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
-        </div>
-
-        <div class="form-group">
-          <label for="nickname">昵称</label>
-          <input
-            id="nickname"
-            v-model="form.nickname"
-            type="text"
-            :class="['form-control', { error: errors.nickname }]"
-            placeholder="请输入昵称"
-            maxlength="20"
-            @blur="validateNickname"
-            @input="clearError('nickname')"
-          />
-          <span v-if="errors.nickname" class="error-message">{{ errors.nickname }}</span>
-        </div>
-
-        <div class="form-group">
-          <label for="verify_code">验证码</label>
-          <div class="verify-row">
+        <form @submit.prevent="handleRegister" class="auth-form">
+          <!-- 昵称 -->
+          <div class="form-group">
+            <label class="form-label" for="nickname">昵称</label>
             <input
-              id="verify_code"
-              v-model="form.verify_code"
+              id="nickname"
+              v-model="form.nickname"
               type="text"
-              :class="['form-control', { error: errors.verify_code }]"
-              placeholder="请输入图形验证码"
-              maxlength="4"
-              autocomplete="off"
-              @blur="validateVerifyCode"
-              @input="handleVerifyCodeInput"
+              class="input"
+              :class="{ 'input--error': errors.nickname }"
+              placeholder="给自己取个名字"
+              maxlength="20"
+              autocomplete="name"
+              @blur="validateNickname"
+              @input="clearError('nickname')"
             />
-            
-            <div class="captcha-panel">
-              <div
-                class="captcha-image"
-                :style="captchaStyle"
-                role="button"
-                tabindex="0"
-                @click="refreshCaptcha"
-              >
-                <img v-if="captcha.image" :src="captcha.image" alt="图形验证码" />
-                <span v-else class="captcha-placeholder">
-                  {{ captcha.loading ? '生成中…' : '点击获取' }}
-                </span>
-              </div>
-              <button
-                type="button"
-                class="btn btn-ghost btn--sm"
-                :disabled="captcha.loading"
-                @click="refreshCaptcha"
-              >
-                {{ captcha.loading ? '生成中…' : '换一张' }}
-              </button>
-            </div>
+            <span v-if="errors.nickname" class="form-error">{{ errors.nickname }}</span>
           </div>
-          <span v-if="errors.verify_code" class="error-message">{{ errors.verify_code }}</span>
-        </div>
 
-        <div v-if="errorMessage" class="error-alert">
-          {{ errorMessage }}
-        </div>
+          <!-- 手机号 -->
+          <div class="form-group">
+            <label class="form-label" for="phone">手机号</label>
+            <input
+              id="phone"
+              v-model="form.phone"
+              type="tel"
+              class="input"
+              :class="{ 'input--error': errors.phone }"
+              placeholder="请输入手机号"
+              maxlength="11"
+              autocomplete="tel"
+              @blur="validatePhone"
+              @input="clearError('phone')"
+            />
+            <span v-if="errors.phone" class="form-error">{{ errors.phone }}</span>
+          </div>
 
-        <button type="submit" class="btn btn-gradient btn--full" :disabled="loading">
-          <span v-if="loading">注册中...</span>
-          <span v-else>完成注册</span>
-        </button>
-      </form>
+          <!-- 密码 -->
+          <div class="form-group">
+            <label class="form-label" for="password">密码</label>
+            <input
+              id="password"
+              v-model="form.password"
+              type="password"
+              class="input"
+              :class="{ 'input--error': errors.password }"
+              placeholder="设置登录密码（至少6位）"
+              autocomplete="new-password"
+              @blur="validatePassword"
+              @input="clearError('password')"
+            />
+            <span v-if="errors.password" class="form-error">{{ errors.password }}</span>
+          </div>
 
-      <footer class="card-footer">
-        <span>已有账号？</span>
-        <router-link to="/login">立即登录</router-link>
-      </footer>
+          <!-- 确认密码 -->
+          <div class="form-group">
+            <label class="form-label" for="confirmPassword">确认密码</label>
+            <input
+              id="confirmPassword"
+              v-model="form.confirmPassword"
+              type="password"
+              class="input"
+              :class="{ 'input--error': errors.confirmPassword }"
+              placeholder="再次输入密码"
+              autocomplete="new-password"
+              @blur="validateConfirmPassword"
+              @input="clearError('confirmPassword')"
+            />
+            <span v-if="errors.confirmPassword" class="form-error">{{ errors.confirmPassword }}</span>
+          </div>
+
+          <!-- 错误提示 -->
+          <div v-if="errorMessage" class="auth-alert auth-alert--error">
+            <IconClose class="auth-alert__icon" />
+            <span>{{ errorMessage }}</span>
+          </div>
+
+          <!-- 提交按钮 -->
+          <button 
+            type="submit" 
+            class="btn btn--primary btn--lg btn--full" 
+            :disabled="loading"
+          >
+            <span v-if="loading" class="loading-spinner loading-spinner--sm"></span>
+            <span>{{ loading ? '注册中...' : '注册' }}</span>
+          </button>
+        </form>
+
+        <!-- 底部链接 -->
+        <footer class="auth-card__footer">
+          <span>已有账号？</span>
+          <router-link to="/login" class="auth-link">立即登录</router-link>
+        </footer>
+      </div>
+
+      <!-- 底部说明 -->
+      <div class="auth-footer">
+        <p>注册即表示同意 <a href="#">服务协议</a> 和 <a href="#">隐私政策</a></p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
+/**
+ * 注册页面
+ * 
+ * 功能：
+ * - 用户注册
+ * - 表单验证
+ * - 注册成功后自动登录并跳转
+ */
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { getCaptcha } from '@/api/user'
-import {
-  getPhoneError,
-  getPasswordError,
-  getVerifyCodeError,
-  getNicknameError
-} from '@/utils/validate'
+import { getPhoneError, getPasswordError, getNicknameError } from '@/utils/validate'
+import IconClose from '@/components/icons/IconClose.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
 
+// 表单数据
 const form = reactive({
+  nickname: '',
   phone: '',
-  verify_code: '',
   password: '',
-  nickname: ''
+  confirmPassword: ''
 })
 
+// 错误信息
 const errors = reactive({
+  nickname: '',
   phone: '',
-  verify_code: '',
   password: '',
-  nickname: ''
+  confirmPassword: ''
 })
 
 const errorMessage = ref('')
 const loading = ref(false)
 
-const captchaSize = ref(getResponsiveCaptchaSize())
-const captcha = reactive({
-  key: '',
-  image: '',
-  loading: false
-})
-
-const captchaStyle = computed(() => ({
-  width: `${captchaSize.value.width}px`,
-  height: `${captchaSize.value.height}px`
-}))
-
-function getResponsiveCaptchaSize() {
-  if (typeof window === 'undefined') {
-    return { width: 200, height: 64 }
-  }
-  return window.innerWidth <= 520
-    ? { width: 160, height: 54 }
-    : { width: 200, height: 64 }
-}
-
-const validatePhone = () => {
-  errors.phone = getPhoneError(form.phone)
-  return !errors.phone
-}
-
-const validateVerifyCode = () => {
-  form.verify_code = form.verify_code.trim().toUpperCase()
-  errors.verify_code = getVerifyCodeError(form.verify_code)
-  return !errors.verify_code
-}
-
-const validatePassword = () => {
-  errors.password = getPasswordError(form.password)
-  return !errors.password
-}
-
+// 验证昵称
 const validateNickname = () => {
   errors.nickname = getNicknameError(form.nickname)
   return !errors.nickname
 }
 
+// 验证手机号
+const validatePhone = () => {
+  errors.phone = getPhoneError(form.phone)
+  return !errors.phone
+}
+
+// 验证密码
+const validatePassword = () => {
+  errors.password = getPasswordError(form.password)
+  return !errors.password
+}
+
+// 验证确认密码
+const validateConfirmPassword = () => {
+  if (!form.confirmPassword) {
+    errors.confirmPassword = '请确认密码'
+  } else if (form.confirmPassword !== form.password) {
+    errors.confirmPassword = '两次密码输入不一致'
+  } else {
+    errors.confirmPassword = ''
+  }
+  return !errors.confirmPassword
+}
+
+// 清除错误
 const clearError = (field) => {
   if (errors[field]) {
     errors[field] = ''
@@ -194,75 +203,16 @@ const clearError = (field) => {
   }
 }
 
+// 表单验证
 const validateForm = () => {
-  const phoneValid = validatePhone()
-  const verifyCodeValid = validateVerifyCode()
-  const passwordValid = validatePassword()
   const nicknameValid = validateNickname()
-  if (!captcha.key) {
-    errorMessage.value = '验证码加载失败，请点击图片刷新'
-    return false
-  }
-  return phoneValid && verifyCodeValid && passwordValid && nicknameValid
+  const phoneValid = validatePhone()
+  const passwordValid = validatePassword()
+  const confirmPasswordValid = validateConfirmPassword()
+  return nicknameValid && phoneValid && passwordValid && confirmPasswordValid
 }
 
-const formatCaptchaImage = (image) => {
-  if (!image) return ''
-  return image.startsWith('data:') ? image : `data:image/png;base64,${image}`
-}
-
-const fetchCaptcha = async (silent = false, resetError = true) => {
-  if (captcha.loading) return
-  captcha.loading = true
-  try {
-    const res = await getCaptcha({
-      width: captchaSize.value.width,
-      height: captchaSize.value.height
-    })
-    const data = res.data || {}
-    captcha.key = data.captcha_key || ''
-    captcha.image = formatCaptchaImage(data.image_base64)
-    form.verify_code = ''
-    if (resetError) {
-      errors.verify_code = ''
-    }
-  } catch (error) {
-    console.error('Fetch captcha error:', error)
-    captcha.key = ''
-    captcha.image = ''
-    form.verify_code = ''
-    if (resetError) {
-      errors.verify_code = ''
-    }
-    if (!silent) {
-      errorMessage.value = error.message || '获取验证码失败，请稍后重试'
-    }
-  } finally {
-    captcha.loading = false
-  }
-}
-
-const refreshCaptcha = () => {
-  fetchCaptcha()
-}
-
-const handleVerifyCodeInput = (event) => {
-  const nextValue = event.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase()
-  form.verify_code = nextValue
-  clearError('verify_code')
-}
-
-const handleResize = () => {
-  const nextSize = getResponsiveCaptchaSize()
-  if (
-    nextSize.width !== captchaSize.value.width ||
-    nextSize.height !== captchaSize.value.height
-  ) {
-    captchaSize.value = nextSize
-    fetchCaptcha(true)
-  }
-}
-
+// 处理注册
 const handleRegister = async () => {
   errorMessage.value = ''
 
@@ -274,192 +224,219 @@ const handleRegister = async () => {
 
   try {
     await userStore.register({
+      nickname: form.nickname,
       phone: form.phone,
-      verify_code: form.verify_code,
-      captcha_key: captcha.key,
-      password: form.password,
-      nickname: form.nickname
+      password: form.password
     })
 
+    // 注册成功，跳转到首页
     router.push('/')
   } catch (error) {
-    const message = error?.message || '注册失败，请稍后重试'
-    if (message.includes('验证码')) {
-      errors.verify_code = message
-      form.verify_code = ''
-      await fetchCaptcha(true, false)
-      return
-    } else {
-      errorMessage.value = message
-      await fetchCaptcha(true)
-    }
+    errorMessage.value = error.message || '注册失败，请稍后重试'
   } finally {
     loading.value = false
   }
 }
-
-onMounted(() => {
-  fetchCaptcha()
-  if (typeof window !== 'undefined') {
-    window.addEventListener('resize', handleResize)
-  }
-})
-
-onBeforeUnmount(() => {
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('resize', handleResize)
-  }
-})
 </script>
 
 <style scoped>
 .auth-page {
   min-height: 100vh;
-  padding: 40px 20px 60px;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-base);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 装饰背景 */
+.auth-page__bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.auth-page__bg-circle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.6;
+}
+
+.auth-page__bg-circle--1 {
+  width: 300px;
+  height: 300px;
+  background: var(--color-primary-200);
+  top: -100px;
+  right: -100px;
+}
+
+.auth-page__bg-circle--2 {
+  width: 200px;
+  height: 200px;
+  background: var(--color-secondary-200);
+  bottom: 10%;
+  left: -60px;
+}
+
+/* 内容区域 */
+.auth-page__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-5);
+  position: relative;
+  z-index: 1;
+}
+
+/* 品牌区域 */
+.auth-header {
+  text-align: center;
+  margin-bottom: var(--space-6);
+  animation: slideInDown var(--duration-slow) var(--ease-out);
+}
+
+.auth-header__logo {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--space-3);
+  background: var(--gradient-primary);
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: var(--shadow-lg);
 }
 
+.auth-header__logo-icon {
+  font-size: 32px;
+}
+
+.auth-header__title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-heading);
+  margin: 0 0 var(--space-1);
+  letter-spacing: 0.05em;
+}
+
+.auth-header__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* 表单卡片 */
 .auth-card {
   width: 100%;
-  max-width: 460px;
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  max-width: 380px;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-xl);
+  animation: slideInUp var(--duration-slow) var(--ease-out);
+  animation-delay: 100ms;
+  animation-fill-mode: both;
 }
 
-.card-header .eyebrow {
-  font-size: 12px;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  margin: 0 0 12px;
+.auth-card__header {
+  text-align: center;
+  margin-bottom: var(--space-5);
+}
+
+.auth-card__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-heading);
+  margin: 0 0 var(--space-1);
+}
+
+.auth-card__desc {
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-}
-
-.card-header h1 {
-  margin: 0 0 8px;
-  font-size: 30px;
-  color: var(--color-text-primary);
-}
-
-.card-header .description {
   margin: 0;
-  color: var(--color-text-secondary);
-  font-size: 15px;
-  line-height: 1.6;
 }
 
+/* 表单 */
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: var(--space-4);
 }
 
-.form-group {
+/* 错误提示框 */
+.auth-alert {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  animation: scaleIn var(--duration-fast) var(--ease-spring);
 }
 
-.form-group label {
-  font-size: 14px;
-  color: var(--color-text-primary);
+.auth-alert--error {
+  background: var(--color-danger-50);
+  color: var(--color-danger-600);
+  border: 1px solid var(--color-danger-100);
 }
 
-.verify-row {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: stretch;
-}
-
-.verify-row input {
-  width: 100%;
-}
-
-.captcha-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: flex-start;
+.auth-alert__icon {
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
-  align-self: flex-start;
-  width: min(220px, 45vw);
 }
 
-.captcha-image {
-  border-radius: var(--radius-medium);
-  overflow: hidden;
-  background: transparent;
+/* 卡片底部 */
+.auth-card__footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  max-width: 100%;
-}
-
-.captcha-image::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  border: 1px solid var(--color-border);
-  pointer-events: none;
-}
-
-.captcha-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-}
-
-.captcha-placeholder {
-  font-size: 13px;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-light);
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  padding: 0 14px;
+}
+
+.auth-link {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.auth-link:hover {
+  color: var(--color-primary-dark);
+}
+
+/* 页面底部 */
+.auth-footer {
+  margin-top: var(--space-6);
   text-align: center;
+  animation: fadeIn var(--duration-slow) var(--ease-out);
+  animation-delay: 400ms;
+  animation-fill-mode: both;
 }
 
-.error-message {
-  font-size: 12px;
-  color: #c44536;
+.auth-footer p {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
 }
 
-.error-alert {
-  padding: 12px 14px;
-  border-radius: var(--radius-small);
-  background: #ffe7e1;
-  color: #a3412b;
-  font-size: 14px;
-  border: 1px solid #ffd3c7;
-}
-
-.card-footer {
-  display: flex;
-  gap: 6px;
-  font-size: 14px;
+.auth-footer a {
   color: var(--color-text-secondary);
-  justify-content: center;
 }
 
-.card-footer a {
-  font-weight: 600;
+.auth-footer a:hover {
+  color: var(--color-primary);
 }
 
-@media (max-width: 520px) {
-  .auth-card {
-    padding: 24px;
-  }
-
-  .captcha-panel {
-    width: min(200px, 100%);
-  }
-
-  .captcha-image {
-    width: 100% !important;
-  }
+/* 按钮加载状态 */
+.btn .loading-spinner {
+  margin-right: var(--space-2);
 }
 </style>
